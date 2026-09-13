@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "wrangler dev",
     "start": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "deploy": "wrangler deploy && python ../../scripts/sync-cms-from-html.py",
+    "cms:sync-from-html": "python ../../scripts/sync-cms-from-html.py",
     "tail": "wrangler tail",
     "db:create": "wrangler d1 create townloc-leads",
     "db:migrate:local": "wrangler d1 migrations apply townloc-leads --local",

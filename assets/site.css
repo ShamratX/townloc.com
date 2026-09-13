@@ -1465,9 +1465,13 @@ p.font-serif.text-xl {
 }
 
 #trust-strip .trust-badge p.text-xs {
-  font-size: 0.86rem !important;
+
+
+  font-size: 0.85rem !important;
   line-height: 1.45 !important;
-  font-weight: 300 !important;
+  font-weight: 400 !important;
+  letter-spacing: 0rem !important;
+  color: #282727 !important;
   font-family: Outfit, system-ui, sans-serif !important;
 }
 
@@ -1656,7 +1660,9 @@ main section h2.svc-section-title {
 }
 
 .text-ink\/40 {
-  color: rgba(17, 17, 17, 0.58) !important;
+  color: #2c2727 !important;
+  letter-spacing: 0rem !important;
+  font-size: 0.95rem !important;
 }
 
 .text-ink\/45 {

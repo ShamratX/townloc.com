@@ -1,0 +1,30 @@
+---
+description: Keep ShamratX master-backend in sync when Townloc backend changes
+alwaysApply: true
+---
+
+# Master backend sync (mandatory)
+
+Canonical shared backend for every frontend:
+
+**https://github.com/ShamratX/master-backend-for-every-frontend**
+
+## Rule
+
+Whenever you **add, change, or remove** anything under Townloc `backend/` (Worker, CMS, API, migrations, `package.json` deploy scripts, related sync utilities that belong in the shared backend), you must also **update that master-backend repo** the same way — not only Townloc.
+
+## Do
+
+1. Port the same logic/files into `master-backend-for-every-frontend` (or the local clone if present).
+2. Tell the user clearly what was synced vs Townloc-only (e.g. site copy in `cmsDefaults` that is Townloc-specific).
+3. If you cannot access/push that repo in the session, stop and say so — do not leave master-backend stale silently.
+
+## Townloc-only (usually no master sync)
+
+- Static site HTML/CSS/JS under site root
+- Townloc-specific marketing copy that is not shared Worker infrastructure
+- One-off site scripts that only apply to `townloc.com` assets (confirm before skipping)
+
+## Prefer asking once
+
+If unsure whether a change is shared infrastructure vs Townloc-only copy, ask before skipping the master repo update.

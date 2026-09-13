@@ -65,10 +65,10 @@ export const CMS_DEFAULTS = {
   pages: {
     home: {
       hero_eyebrow:
-        "Google Business Profile · Google Reviews · Google Ads · Website Building · Local SEO · Remove Negative Reviews",
-      hero_title: "Get Found on Google. Build Trust. Turn Searches Into Customers.",
+        "LOCAL VISIBILITY · CUSTOMER TRUST · QUALIFIED LEADS · REAL GROWTH",
+      hero_title: "Get Found on Google. Build Trust. Turn More Searches Into Customers.",
       hero_lead:
-        "We help local businesses improve their Google Business Profile, earn genuine customer reviews, run Google Ads, build websites, strengthen Local SEO, and carefully handle harmful reviews — so searches turn into calls, bookings, and leads.",
+        "We help local businesses get found, earn trust, and grow — combining Google, reviews, reputation management, ads, websites, and local SEO in a way that feels right for your business and your customers.",
       hero_image: "",
       hero_cta_primary: "Get a Free Assessment",
       hero_cta_secondary: "Explore Services",

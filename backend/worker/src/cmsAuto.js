@@ -11,6 +11,16 @@ function escapeHtml(s) {
     .replace(/"/g, "&quot;");
 }
 
+/** Undo common entities before re-escaping (avoids &amp;amp; on live). */
+function decodeBasicEntities(s) {
+  return String(s || "")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'");
+}
+
 function stripTags(html) {
   return String(html || "")
     .replace(/<script[\s\S]*?<\/script>/gi, " ")
@@ -356,7 +366,12 @@ export function applyEditables(html, overrides) {
       const stableId = stableTextId(tag.toLowerCase(), text, dataCms);
       const next = pickOverride(overrides, stableId, legacyId);
       if (next == null || String(next).trim() === "") return full;
-      return `<${tag}${attrs}>${escapeHtml(String(next).trim())}</${tag}>`;
+      // Keep structured markup (e.g. work-step strong+span). Flattening it
+      // into plain text collapses the 4.5rem CSS grid into a one-word column.
+      if (/<[a-z][\s\S]*?>/i.test(inner)) return full;
+      return `<${tag}${attrs}>${escapeHtml(
+        decodeBasicEntities(String(next).trim())
+      )}</${tag}>`;
     }
   );
 
@@ -370,7 +385,10 @@ export function applyEditables(html, overrides) {
       const next = pickOverride(overrides, stableId, null);
       if (next == null || String(next).trim() === "") return full;
       if (/<img\b|<svg\b/i.test(inner)) return full;
-      return `<${tag}${attrs}>${escapeHtml(String(next).trim())}</${tag}>`;
+      if (/<[a-z][\s\S]*?>/i.test(inner)) return full;
+      return `<${tag}${attrs}>${escapeHtml(
+        decodeBasicEntities(String(next).trim())
+      )}</${tag}>`;
     }
   );
 

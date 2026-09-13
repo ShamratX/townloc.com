@@ -2228,14 +2228,15 @@
 
     @media (min-width: 768px) {
       .work-row {
-        grid-template-columns: 7.5rem minmax(0, 1.1fr) minmax(0, 1.4fr);
-        align-items: center;
+        grid-template-columns: 7.5rem minmax(12rem, 1.1fr) minmax(16rem, 1.4fr);
+        align-items: start;
         gap: 1.25rem 2rem;
         padding: 1.35rem 0;
       }
 
       .work-row-service {
-        align-self: center;
+        align-self: start;
+        padding-top: 0.2rem;
       }
     }
 
@@ -2266,20 +2267,33 @@
     }
 
     .work-step {
-      display: grid;
-      grid-template-columns: 4.5rem minmax(0, 1fr);
-      gap: 0.65rem;
+      display: block;
+      max-width: 100%;
       font-size: 0.875rem;
       line-height: 1.45;
       color: #66635D;
     }
 
+    /* Two-column label/body only when markup is intact */
+    .work-step:has(> span) {
+      display: grid;
+      grid-template-columns: 4.5rem minmax(0, 1fr);
+      gap: 0.65rem;
+    }
+
     .work-step strong {
+      display: inline-block;
+      min-width: 4.5rem;
+      margin-right: 0.65rem;
       font-size: 0.6875rem;
       font-weight: 500;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: #111111;
+    }
+
+    .work-step:has(> span) strong {
+      margin-right: 0;
     }
 
     .work-compact-heading {
@@ -2447,9 +2461,11 @@
     }
 
     #trust-strip .trust-badge p.text-xs {
-      font-size: 0.75rem !important;
+      font-size: 0.85rem !important;
       line-height: 1.45 !important;
       font-weight: 400 !important;
+      letter-spacing: 0rem !important;
+      color: #282727 !important;
       font-family: Outfit, system-ui, sans-serif !important;
     }
 
@@ -2546,7 +2562,9 @@
     }
 
     .text-ink\/40 {
-      color: rgba(17, 17, 17, 0.58) !important;
+      color: #2c2727 !important;
+      letter-spacing: 0rem !important;
+      font-size: 0.95rem !important;
     }
 
     .text-ink\/45 {
