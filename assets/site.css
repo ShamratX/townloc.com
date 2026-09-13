@@ -301,7 +301,37 @@ input:focus, select:focus, textarea:focus {
 details summary { list-style: none; cursor: pointer; }
 details summary::-webkit-details-marker { display: none; }
 details[open] summary span:last-child { transform: rotate(45deg); }
-details summary span:last-child { display: inline-block; transition: transform 0.2s ease; }
+details summary span:last-child {
+  display: inline-block;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* FAQ accordion (home + service pages) */
+.faq-accordion details summary span:last-child {
+  transform: none;
+  transform-origin: center;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.faq-accordion details.is-open summary span:last-child {
+  transform: rotate(45deg);
+}
+.faq-accordion .faq-panel {
+  overflow: hidden;
+  height: 0;
+}
+.faq-accordion .faq-panel > * {
+  /* padding instead of margin — avoids end-of-open height jump */
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0.75rem;
+  padding-bottom: 0.15rem;
+  box-sizing: border-box;
+}
+@media (prefers-reduced-motion: reduce) {
+  .faq-accordion details summary span:last-child {
+    transition-duration: 0.01ms;
+  }
+}
 
 .nav-drop-btn {
   display: inline-flex;
@@ -1435,7 +1465,7 @@ p.font-serif.text-xl {
 }
 
 #trust-strip .trust-badge p.text-xs {
-  font-size: 0.75rem !important;
+  font-size: 0.86rem !important;
   line-height: 1.45 !important;
   font-weight: 300 !important;
   font-family: Outfit, system-ui, sans-serif !important;
@@ -1605,6 +1635,7 @@ main section h2.svc-section-title {
   font-weight: 300 !important;
   text-transform: uppercase;
   letter-spacing: 0.1em !important;
+  color: #2c2727 !important;
 }
 
 /* Stronger muted / secondary text for contrast */
@@ -1714,7 +1745,7 @@ main section h2.svc-section-title {
   opacity: 1 !important;
   color: #ffffff !important;
   font-weight: 300 !important;
-  font-size: 0.975rem !important;
+  font-size: 1.14rem !important;
 }
 
 #site-header a.flex > span:last-child,

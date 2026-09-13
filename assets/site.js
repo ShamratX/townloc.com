@@ -441,43 +441,112 @@
     });
   });
 
-  var faqItems = document.querySelectorAll("#faq details");
+  function faqPanelInner(panel) {
+    return panel ? panel.firstElementChild : null;
+  }
+  function faqContentHeight(inner) {
+    return Math.ceil(inner.getBoundingClientRect().height);
+  }
+  function setFaqHeight(panel, px) {
+    panel.style.height = px;
+  }
   function closeFaq(item) {
     var panel = item.querySelector(".faq-panel");
+    var inner = faqPanelInner(panel);
     item.classList.remove("is-open");
+    if (!panel || !inner) {
+      item.removeAttribute("open");
+      return;
+    }
+    var start = panel.getBoundingClientRect().height;
+    if (!start) start = faqContentHeight(inner);
+    panel.style.transition = "none";
+    setFaqHeight(panel, start + "px");
+    void panel.offsetHeight;
+    panel.style.transition = "height 0.4s cubic-bezier(0.22, 1, 0.36, 1)";
+    setFaqHeight(panel, "0px");
     var done = false;
-    var finish = function (event) {
+    var finish = function () {
       if (done) return;
-      if (event && event.target && event.target !== panel) return;
-      if (event && event.propertyName && event.propertyName !== "grid-template-rows") return;
       done = true;
       item.removeAttribute("open");
-      panel.removeEventListener("transitionend", finish);
+      panel.style.transition = "none";
+      setFaqHeight(panel, "0px");
+      panel.removeEventListener("transitionend", onEnd);
     };
-    panel.addEventListener("transitionend", finish);
-    setTimeout(finish, 420);
+    var onEnd = function (event) {
+      if (event.target !== panel || event.propertyName !== "height") return;
+      finish();
+    };
+    panel.addEventListener("transitionend", onEnd);
+    window.setTimeout(finish, 450);
   }
   function openFaq(item) {
+    var panel = item.querySelector(".faq-panel");
+    var inner = faqPanelInner(panel);
+    if (!panel || !inner) {
+      item.setAttribute("open", "");
+      item.classList.add("is-open");
+      return;
+    }
     item.setAttribute("open", "");
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        item.classList.add("is-open");
+    item.classList.add("is-open");
+    panel.style.transition = "none";
+    setFaqHeight(panel, "0px");
+    panel.style.overflow = "hidden";
+    void panel.offsetHeight;
+    var target = faqContentHeight(inner);
+    panel.style.transition = "height 0.4s cubic-bezier(0.22, 1, 0.36, 1)";
+    setFaqHeight(panel, target + "px");
+    var done = false;
+    var finish = function () {
+      if (done) return;
+      done = true;
+      panel.style.transition = "none";
+      setFaqHeight(panel, faqContentHeight(inner) + "px");
+      panel.removeEventListener("transitionend", onEnd);
+    };
+    var onEnd = function (event) {
+      if (event.target !== panel || event.propertyName !== "height") return;
+      finish();
+    };
+    panel.addEventListener("transitionend", onEnd);
+    window.setTimeout(finish, 450);
+  }
+  var allFaqItems = [];
+  document.querySelectorAll(".faq-accordion").forEach(function (section) {
+    var faqItems = section.querySelectorAll("details");
+    faqItems.forEach(function (item) {
+      allFaqItems.push(item);
+      var summary = item.querySelector("summary");
+      var panel = item.querySelector(".faq-panel");
+      if (!summary || !panel) return;
+      if (!item.classList.contains("is-open")) {
+        panel.style.height = "0px";
+        panel.style.overflow = "hidden";
+      }
+      summary.addEventListener("click", function (event) {
+        event.preventDefault();
+        if (item.classList.contains("is-open")) {
+          closeFaq(item);
+          return;
+        }
+        // One open at a time within this FAQ section
+        faqItems.forEach(function (other) {
+          if (other !== item && other.classList.contains("is-open")) closeFaq(other);
+        });
+        openFaq(item);
       });
     });
-  }
-  faqItems.forEach(function (item) {
-    var summary = item.querySelector("summary");
-    if (!summary) return;
-    summary.addEventListener("click", function (event) {
-      event.preventDefault();
-      if (item.classList.contains("is-open")) {
-        closeFaq(item);
-        return;
-      }
-      faqItems.forEach(function (other) {
-        if (other !== item && other.classList.contains("is-open")) closeFaq(other);
-      });
-      openFaq(item);
+  });
+  window.addEventListener("resize", function () {
+    allFaqItems.forEach(function (item) {
+      if (!item.classList.contains("is-open")) return;
+      var panel = item.querySelector(".faq-panel");
+      var inner = faqPanelInner(panel);
+      if (!panel || !inner) return;
+      panel.style.transition = "none";
+      setFaqHeight(panel, faqContentHeight(inner) + "px");
     });
   });
 

@@ -85,17 +85,17 @@ export const CMS_DEFAULTS = {
       svc1_title: "Get Your Google Business Profile Working for You",
       svc1_lead:
         "We set up, fix, and optimize your Google Business Profile so customers can find the right business information when they search.",
-      svc1_cta: "Optimize My Profile →",
+      svc1_cta: "Improve My Profile →",
       svc2_label: "02 · Google Reviews",
       svc2_title: "Get More Genuine Google Reviews",
       svc2_lead:
         "Turn completed jobs and happy customers into authentic Google reviews that build trust before someone calls.",
-      svc2_cta: "Improve My Reviews →",
+      svc2_cta: "Get More Reviews →",
       svc3_label: "03 · Google Ads",
       svc3_title: "Get In Front of Customers Ready to Buy",
       svc3_lead:
         "We build Google Search campaigns around high-intent searches so your budget is focused on people actively looking for your service.",
-      svc3_cta: "Launch My Google Ads →",
+      svc3_cta: "Start My Google Ads →",
       svc4_label: "04 · Website Building",
       svc4_title: "Turn Google Visitors Into Customers",
       svc4_lead:
@@ -105,12 +105,12 @@ export const CMS_DEFAULTS = {
       svc5_title: "Get Found by Local Customers Searching Nearby",
       svc5_lead:
         "We improve your local search presence so nearby customers can find your business when they need your service.",
-      svc5_cta: "Grow My Local SEO →",
+      svc5_cta: "Improve My Local SEO →",
       svc6_label: "06 · Remove Negative Reviews",
       svc6_title: "Handle Harmful Reviews the Right Way",
       svc6_lead:
         "We help you address unfair or damaging Google reviews with a careful process that protects your reputation.",
-      svc6_cta: "Fix My Reviews →",
+      svc6_cta: "Request Review Removal →",
       svc_card_gbp_image: "",
       svc_card_reviews_image: "",
       svc_card_ads_image: "",

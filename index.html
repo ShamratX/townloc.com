@@ -176,33 +176,33 @@
 
     details summary span:last-child {
       display: inline-block;
-      transition: transform 0.2s ease;
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     details[open] summary span:last-child {
       transform: rotate(45deg);
     }
 
-    #faq .faq-panel {
-      display: grid;
-      grid-template-rows: 0fr;
-      transition: grid-template-rows 0.38s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    #faq .faq-panel>* {
-      min-height: 0;
+    .faq-accordion .faq-panel {
       overflow: hidden;
+      height: 0;
     }
 
-    #faq details.is-open .faq-panel {
-      grid-template-rows: 1fr;
+    .faq-accordion .faq-panel>* {
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      padding-top: 0.75rem;
+      padding-bottom: 0.15rem;
+      box-sizing: border-box;
     }
 
-    #faq details summary span:last-child {
+    .faq-accordion details summary span:last-child {
       transform: none;
+      transform-origin: center;
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    #faq details.is-open summary span:last-child {
+    .faq-accordion details.is-open summary span:last-child {
       transform: rotate(45deg);
     }
 
@@ -1035,6 +1035,22 @@
       padding-top: 1.75rem;
     }
 
+    /* Problem section: equal card heights, no forced empty space */
+    .problem-gap-cards {
+      align-items: stretch;
+    }
+
+    @media (min-width: 640px) {
+      .problem-gap-cards {
+        grid-auto-rows: 1fr;
+      }
+    }
+
+    .problem-gap-card {
+      box-sizing: border-box;
+      height: 100%;
+    }
+
     @media (min-width: 1024px) {
       #trust-strip.hero-trust-strip {
         margin-top: 0;
@@ -1366,10 +1382,21 @@
     }
 
     @media (max-width: 1023px) {
-      .footer-top>.footer-col:nth-child(1) { order: 1; }
-      .footer-top>.footer-col:nth-child(2) { order: 2; }
-      .footer-top>.footer-col:nth-child(3) { order: 4; }
-      .footer-top>.footer-col:nth-child(4) { order: 3; }
+      .footer-top>.footer-col:nth-child(1) {
+        order: 1;
+      }
+
+      .footer-top>.footer-col:nth-child(2) {
+        order: 2;
+      }
+
+      .footer-top>.footer-col:nth-child(3) {
+        order: 4;
+      }
+
+      .footer-top>.footer-col:nth-child(4) {
+        order: 3;
+      }
     }
 
     @media (min-width: 768px) {
@@ -1548,6 +1575,7 @@
       line-height: 1;
       object-fit: contain;
     }
+
     .footer-contact-wa {
       width: 1.25rem;
       height: 1.25rem;
@@ -1668,6 +1696,7 @@
         justify-content: center;
         text-align: center;
       }
+
       .footer-bottom .footer-cta {
         display: none !important;
       }
@@ -2213,9 +2242,9 @@
     .work-row-service {
       font-size: 0.6875rem;
       font-weight: 500;
-      letter-spacing: 0.16em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: #66635D;
+      color: #2c2727;
     }
 
     .work-row-title {
@@ -2263,7 +2292,7 @@
       max-width: 56.25rem;
     }
 
-    #faq .faq-panel p {
+    .faq-accordion .faq-panel p {
       font-size: clamp(1rem, 1.05vw, 1.125rem);
       line-height: 1.65;
     }
@@ -2325,8 +2354,7 @@
       .hero-media img,
       .float-chip,
       .field-input,
-      .journey-scroll-arrow,
-      #faq .faq-panel {
+      .journey-scroll-arrow {
         animation: none !important;
         transition: none !important;
       }
@@ -2635,7 +2663,7 @@
       opacity: 1 !important;
       color: #ffffff !important;
       font-weight: 400 !important;
-      font-size: 0.975rem !important;
+      font-size: 1.14rem !important;
     }
 
     #site-header .text-\[15px\] {
@@ -2806,6 +2834,16 @@
     "mainEntity": [
       {
         "@type": "Question",
+        "name": "Can you help with negative or unfair Google reviews?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. We can assess the review, help you respond professionally, and guide you through appropriate reporting options when a review may violate Google's policies. We do not buy reviews or promise guaranteed removal." }
+      },
+      {
+        "@type": "Question",
+        "name": "Do you need Local SEO if I already have a Google Business Profile?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. A Google Business Profile and Local SEO support different parts of local visibility. We can review your business information, services, local search signals, website connection, and overall presence to identify what needs improvement." }
+      },
+      {
+        "@type": "Question",
         "name": "Do you buy Google reviews?",
         "acceptedAnswer": { "@type": "Answer", "text": "No. Townloc never buys stars, farms accounts, or posts fake check-ins. Review work is a timed ask after a real job so customers who already used you can write what they experienced." }
       },
@@ -2827,7 +2865,7 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="assets/site.css?v=61" />
+  <link rel="stylesheet" href="assets/site.css?v=65" />
 </head>
 
 <body class="bg-paper text-ink antialiased">
@@ -2839,7 +2877,8 @@
   <header id="site-header" class="fixed inset-x-0 top-0 z-50 border-b border-white/10 text-paper">
     <nav class="mx-auto flex w-full max-w-7xl items-center justify-between" aria-label="Primary">
       <a href="index.html" class="site-logo-link flex items-center" aria-label="Townloc home">
-        <img class="site-logo site-logo-header" src="assets/images/townloc-logo.png?v=6" alt="Townloc" width="151" height="45" decoding="sync" fetchpriority="high" />
+        <img class="site-logo site-logo-header" src="assets/images/townloc-logo.png?v=6" alt="Townloc" width="151"
+          height="45" decoding="sync" fetchpriority="high" />
       </a>
       <ul class="hidden items-center gap-8 text-sm md:flex">
         <li class="nav-drop relative">
@@ -2943,15 +2982,13 @@
         <div class="mx-auto w-full max-w-7xl">
           <div class="hero-copy max-w-3xl">
             <p class="hero-eyebrow" data-cms="page.hero_eyebrow">
-              Google Business Profile · Google Reviews · Google Ads · Website Building · Local SEO · Remove Negative
-              Reviews</p>
+              LOCAL VISIBILITY · CUSTOMER TRUST · QUALIFIED LEADS · REAL GROWTH</p>
             <h1 class="hero-title font-serif tracking-tight" data-cms="page.hero_title">
-              Get Found on Google. Build Trust. Turn Searches Into Customers.
+              Get Found on Google. Build Trust. Turn More Searches Into Customers.
             </h1>
             <p class="hero-lead body-lg" data-cms="page.hero_lead">
-              We help local businesses improve their Google Business Profile, earn genuine customer reviews, run Google
-              Ads, build websites, strengthen Local SEO, and carefully handle harmful reviews — so searches turn into
-              calls, bookings, and leads.
+              We help local businesses get found, earn trust, and grow — combining Google, reviews, reputation
+              management, ads, websites, and local SEO in a way that feels right for your business and your customers.
             </p>
             <div class="hero-actions">
               <a href="#contact" class="btn-primary" data-cms="page.hero_cta_primary">Get a Free Assessment</a>
@@ -2972,44 +3009,49 @@
         <div class="trust-badges mt-6">
           <div class="trust-badge">
             <span class="trust-badge-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.75">
-                <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6z" />
+                stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 21h18" />
+                <path d="M5 21V8l7-4 7 4v13" />
+                <path d="M9 21v-6h6v6" />
               </svg></span>
             <div>
-              <p class="text-sm font-medium">Genuine Reviews</p>
-              <p class="mt-0.5 text-xs text-ink/55">No purchased or fake reviews.</p>
+              <p class="text-sm font-medium">Built for Your Business</p>
+              <p class="mt-0.5 text-xs text-ink/55">What your business truly needs.</p>
             </div>
           </div>
           <div class="trust-badge">
             <span class="trust-badge-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.75">
-                <path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7H14a3.5 3.5 0 010 7H6" />
+                stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="8" cy="15" r="4" />
+                <path d="M10.7 12.3L19 4" />
+                <path d="M15 5l3 3" />
+                <path d="M17.5 7.5L20 5" />
               </svg></span>
             <div>
-              <p class="text-sm font-medium">Google-Billed Ads</p>
-              <p class="mt-0.5 text-xs text-ink/55">Transparent ad spend.</p>
+              <p class="text-sm font-medium">You Stay in Control</p>
+              <p class="mt-0.5 text-xs text-ink/55">Your assets always remain yours.</p>
             </div>
           </div>
           <div class="trust-badge">
             <span class="trust-badge-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.75">
-                <path d="M9 12l2 2 4-4" />
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 1v22" />
+                <path d="M17 5H9.5a3.5 3.5 0 000 7H14a3.5 3.5 0 010 7H6" />
               </svg></span>
             <div>
-              <p class="text-sm font-medium">100% Website Ownership</p>
-              <p class="mt-0.5 text-xs text-ink/55">Full source-code access.</p>
+              <p class="text-sm font-medium">Clear From the Start</p>
+              <p class="mt-0.5 text-xs text-ink/55">Know exactly what you're paying.</p>
             </div>
           </div>
           <div class="trust-badge">
             <span class="trust-badge-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.75">
-                <rect x="3" y="11" width="18" height="11" rx="2" />
-                <path d="M7 11V7a5 5 0 0110 0v4" />
+                stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M8.5 12.5l2.5 2.5 4.5-5" />
               </svg></span>
             <div>
-              <p class="text-sm font-medium">No Locked Accounts</p>
-              <p class="mt-0.5 text-xs text-ink/55">Assets stay in your name.</p>
+              <p class="text-sm font-medium">No Empty Promises</p>
+              <p class="mt-0.5 text-xs text-ink/55">Honest work, realistic expectations.</p>
             </div>
           </div>
         </div>
@@ -3026,22 +3068,22 @@
           <p class="mt-5 text-lg leading-relaxed text-ink/60" data-cms="page.problem_lead">We fix the gaps between
             Google search and the customer.
           </p>
-          <div class="mt-10 grid gap-5 sm:grid-cols-2">
-            <div class="reveal rounded-2xl border border-line bg-white p-5">
+          <div class="problem-gap-cards mt-10 grid gap-4 sm:grid-cols-2">
+            <div class="problem-gap-card reveal rounded-2xl border border-line bg-white p-5">
               <p class="font-serif text-lg">Can't Find You</p>
               <p class="mt-2 text-sm leading-relaxed text-ink/60">Your Google Business Profile isn't properly optimized.
               </p>
             </div>
-            <div class="reveal rounded-2xl border border-line bg-white p-5">
+            <div class="problem-gap-card reveal rounded-2xl border border-line bg-white p-5">
               <p class="font-serif text-lg">Don't Trust You Yet</p>
-              <p class="mt-2 text-sm leading-relaxed text-ink/60">Your competitors have more recent, genuine reviews.
+              <p class="mt-2 text-sm leading-relaxed text-ink/60">Your competitors have great Reputation Management.
               </p>
             </div>
-            <div class="reveal rounded-2xl border border-line bg-white p-5">
+            <div class="problem-gap-card reveal rounded-2xl border border-line bg-white p-5">
               <p class="font-serif text-lg">You're Paying for the Wrong Clicks</p>
-              <p class="mt-2 text-sm leading-relaxed text-ink/60">Your Ads aren't focused on high-intent searches.</p>
+              <p class="mt-2 text-sm leading-relaxed text-ink/60">Reach the right audience. Capture local searches.</p>
             </div>
-            <div class="reveal rounded-2xl border border-line bg-white p-5">
+            <div class="problem-gap-card reveal rounded-2xl border border-line bg-white p-5">
               <p class="font-serif text-lg">Your Website Doesn't Convert</p>
               <p class="mt-2 text-sm leading-relaxed text-ink/60">Visitors arrive but don't know what to do next.</p>
             </div>
@@ -3085,47 +3127,29 @@
                 optimize your Google
                 Business Profile so customers can find the right business information when they search.</p>
               <span
-                class="mt-6 inline-flex items-center gap-2 text-sm font-medium transition-all duration-300 ease-in-out group-hover:gap-3">Optimize
+                class="mt-6 inline-flex items-center gap-2 text-sm font-medium transition-all duration-300 ease-in-out group-hover:gap-3">Improve
                 My Profile <span aria-hidden="true">→</span></span>
             </div>
           </a>
-          <a href="services/google-maps-review-management.html"
+          <a href="services/remove-negative-reviews.html"
             class="svc-card reveal group flex flex-col overflow-hidden rounded-[1.75rem] border border-line bg-white shadow-lift transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-2xl">
             <div class="overflow-hidden">
-              <img data-cms-src="page.svc_card_reviews_image"
-                src="assets/images/shared/service-google-business-reviews.webp?v=10"
-                alt="Illustrated Google Reviews service banner with star rating graphics"
-                class="w-full object-cover object-center" width="1600" height="639" loading="lazy" decoding="async" />
+              <img data-cms-src="page.svc_card_neg_image"
+                src="assets/images/shared/service-remove-negative-reviews.webp?v=12"
+                alt="Remove a review from Google Maps service banner" class="w-full object-cover object-center"
+                width="1600" height="898" loading="lazy" decoding="async" />
             </div>
             <div class="flex flex-1 flex-col p-7">
-              <p class="text-xs tracking-[0.18em] text-ink/40" data-cms="page.svc2_label">02 · Google Reviews</p>
-              <h3 class="mt-3 font-serif text-2xl leading-snug" data-cms="page.svc2_title">Get More Genuine Google
-                Reviews</h3>
-              <p class="mt-3 flex-1 text-sm leading-relaxed text-ink/65" data-cms="page.svc2_lead">Turn completed jobs
-                and happy customers into
-                authentic Google reviews that build trust before someone calls.</p>
+              <p class="text-xs tracking-[0.18em] text-ink/40" data-cms="page.svc6_label">02 · Remove Negative Reviews
+              </p>
+              <h3 class="mt-3 font-serif text-2xl leading-snug" data-cms="page.svc6_title">Handle Harmful Reviews the
+                Right Way</h3>
+              <p class="mt-3 flex-1 text-sm leading-relaxed text-ink/65" data-cms="page.svc6_lead">We help you address
+                unfair or damaging Google
+                reviews with a careful process that protects your reputation.</p>
               <span
-                class="mt-6 inline-flex items-center gap-2 text-sm font-medium transition-all duration-300 ease-in-out group-hover:gap-3">Improve
-                My Reviews <span aria-hidden="true">→</span></span>
-            </div>
-          </a>
-          <a href="services/google-ads-campaigns.html"
-            class="svc-card reveal group flex flex-col overflow-hidden rounded-[1.75rem] border border-line bg-white shadow-lift transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-2xl">
-            <div class="overflow-hidden">
-              <img data-cms-src="page.svc_card_ads_image" src="assets/images/shared/service-google-ads.webp?v=10"
-                alt="Illustrated Google Ads service banner for paid search" class="w-full object-cover object-center"
-                width="1600" height="1077" loading="lazy" decoding="async" />
-            </div>
-            <div class="flex flex-1 flex-col p-7">
-              <p class="text-xs tracking-[0.18em] text-ink/40" data-cms="page.svc3_label">03 · Google Ads</p>
-              <h3 class="mt-3 font-serif text-2xl leading-snug" data-cms="page.svc3_title">Get In Front of Customers
-                Ready to Buy</h3>
-              <p class="mt-3 flex-1 text-sm leading-relaxed text-ink/65" data-cms="page.svc3_lead">We build Google
-                Search campaigns around
-                high-intent searches so your budget is focused on people actively looking for your service.</p>
-              <span
-                class="mt-6 inline-flex items-center gap-2 text-sm font-medium transition-all duration-300 ease-in-out group-hover:gap-3">Launch
-                My Google Ads <span aria-hidden="true">→</span></span>
+                class="mt-6 inline-flex items-center gap-2 text-sm font-medium transition-all duration-300 ease-in-out group-hover:gap-3">Request
+                Review Removal <span aria-hidden="true">→</span></span>
             </div>
           </a>
           <a href="services/web-development.html"
@@ -3136,7 +3160,7 @@
                 class="w-full object-cover object-center" width="1600" height="900" loading="lazy" decoding="async" />
             </div>
             <div class="flex flex-1 flex-col p-7">
-              <p class="text-xs tracking-[0.18em] text-ink/40" data-cms="page.svc4_label">04 · Website Building</p>
+              <p class="text-xs tracking-[0.18em] text-ink/40" data-cms="page.svc4_label">03 · Website Building</p>
               <h3 class="mt-3 font-serif text-2xl leading-snug" data-cms="page.svc4_title">Turn Google Visitors Into
                 Customers</h3>
               <p class="mt-3 flex-1 text-sm leading-relaxed text-ink/65" data-cms="page.svc4_lead">Fast, mobile-friendly
@@ -3155,36 +3179,54 @@
                 class="w-full object-cover object-center" width="1600" height="1066" loading="lazy" decoding="async" />
             </div>
             <div class="flex flex-1 flex-col p-7">
-              <p class="text-xs tracking-[0.18em] text-ink/40" data-cms="page.svc5_label">05 · Local SEO</p>
+              <p class="text-xs tracking-[0.18em] text-ink/40" data-cms="page.svc5_label">04 · Local SEO</p>
               <h3 class="mt-3 font-serif text-2xl leading-snug" data-cms="page.svc5_title">Get Found by Local Customers
                 Searching Nearby</h3>
               <p class="mt-3 flex-1 text-sm leading-relaxed text-ink/65" data-cms="page.svc5_lead">We improve your local
                 search presence so nearby
                 customers can find your business when they need your service.</p>
               <span
-                class="mt-6 inline-flex items-center gap-2 text-sm font-medium transition-all duration-300 ease-in-out group-hover:gap-3">Grow
+                class="mt-6 inline-flex items-center gap-2 text-sm font-medium transition-all duration-300 ease-in-out group-hover:gap-3">Improve
                 My Local SEO <span aria-hidden="true">→</span></span>
             </div>
           </a>
-          <a href="services/remove-negative-reviews.html"
+          <a href="services/google-ads-campaigns.html"
             class="svc-card reveal group flex flex-col overflow-hidden rounded-[1.75rem] border border-line bg-white shadow-lift transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-2xl">
             <div class="overflow-hidden">
-              <img data-cms-src="page.svc_card_neg_image"
-                src="assets/images/shared/service-remove-negative-reviews.webp?v=12"
-                alt="Remove a review from Google Maps service banner" class="w-full object-cover object-center"
-                width="1600" height="898" loading="lazy" decoding="async" />
+              <img data-cms-src="page.svc_card_ads_image" src="assets/images/shared/service-google-ads.webp?v=10"
+                alt="Illustrated Google Ads service banner for paid search" class="w-full object-cover object-center"
+                width="1600" height="1077" loading="lazy" decoding="async" />
             </div>
             <div class="flex flex-1 flex-col p-7">
-              <p class="text-xs tracking-[0.18em] text-ink/40" data-cms="page.svc6_label">06 · Remove Negative Reviews
-              </p>
-              <h3 class="mt-3 font-serif text-2xl leading-snug" data-cms="page.svc6_title">Handle Harmful Reviews the
-                Right Way</h3>
-              <p class="mt-3 flex-1 text-sm leading-relaxed text-ink/65" data-cms="page.svc6_lead">We help you address
-                unfair or damaging Google
-                reviews with a careful process that protects your reputation.</p>
+              <p class="text-xs tracking-[0.18em] text-ink/40" data-cms="page.svc3_label">05 · Google Ads</p>
+              <h3 class="mt-3 font-serif text-2xl leading-snug" data-cms="page.svc3_title">Get In Front of Customers
+                Ready to Buy</h3>
+              <p class="mt-3 flex-1 text-sm leading-relaxed text-ink/65" data-cms="page.svc3_lead">We build Google
+                Search campaigns around
+                high-intent searches so your budget is focused on people actively looking for your service.</p>
               <span
-                class="mt-6 inline-flex items-center gap-2 text-sm font-medium transition-all duration-300 ease-in-out group-hover:gap-3">Fix
-                My Reviews <span aria-hidden="true">→</span></span>
+                class="mt-6 inline-flex items-center gap-2 text-sm font-medium transition-all duration-300 ease-in-out group-hover:gap-3">Start
+                My Google Ads <span aria-hidden="true">→</span></span>
+            </div>
+          </a>
+          <a href="services/google-maps-review-management.html"
+            class="svc-card reveal group flex flex-col overflow-hidden rounded-[1.75rem] border border-line bg-white shadow-lift transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-2xl">
+            <div class="overflow-hidden">
+              <img data-cms-src="page.svc_card_reviews_image"
+                src="assets/images/shared/service-google-business-reviews.webp?v=10"
+                alt="Illustrated Google Reviews service banner with star rating graphics"
+                class="w-full object-cover object-center" width="1600" height="639" loading="lazy" decoding="async" />
+            </div>
+            <div class="flex flex-1 flex-col p-7">
+              <p class="text-xs tracking-[0.18em] text-ink/40" data-cms="page.svc2_label">06 · Google Reviews</p>
+              <h3 class="mt-3 font-serif text-2xl leading-snug" data-cms="page.svc2_title">Get More Genuine Google
+                Reviews</h3>
+              <p class="mt-3 flex-1 text-sm leading-relaxed text-ink/65" data-cms="page.svc2_lead">Turn completed jobs
+                and happy customers into
+                authentic Google reviews that build trust before someone calls.</p>
+              <span
+                class="mt-6 inline-flex items-center gap-2 text-sm font-medium transition-all duration-300 ease-in-out group-hover:gap-3">Get
+                More Reviews <span aria-hidden="true">→</span></span>
             </div>
           </a>
         </div>
@@ -3213,21 +3255,24 @@
                 </svg></span>
               <p class="journey-label">Google Search</p>
             </div>
+
             <div class="journey-step">
               <span class="journey-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 21s7-4.5 7-11a7 7 0 10-14 0c0 6.5 7 11 7 11z" />
                   <circle cx="12" cy="10" r="2.5" />
                 </svg></span>
-              <p class="journey-label">Business Profile</p>
+              <p class="journey-label">Google Business Profile</p>
             </div>
+
             <div class="journey-step">
               <span class="journey-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6z" />
                 </svg></span>
-              <p class="journey-label">Google Reviews</p>
+              <p class="journey-label">Remove Negative Reviews</p>
             </div>
+
             <div class="journey-step">
               <span class="journey-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
@@ -3238,6 +3283,7 @@
                 </svg></span>
               <p class="journey-label">Website Building</p>
             </div>
+
             <div class="journey-step">
               <span class="journey-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
@@ -3246,13 +3292,24 @@
                 </svg></span>
               <p class="journey-label">Local SEO</p>
             </div>
+
+            <div class="journey-step">
+              <span class="journey-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 11l18-8v18L3 13v-2z" />
+                  <path d="M11.5 15.5L16 7" />
+                </svg></span>
+              <p class="journey-label">Google Ads</p>
+            </div>
+
             <div class="journey-step">
               <span class="journey-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6z" />
                 </svg></span>
-              <p class="journey-label">Remove Negative Reviews</p>
+              <p class="journey-label">Google Reviews</p>
             </div>
+
             <div class="journey-step journey-step-final">
               <span class="journey-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
@@ -3285,8 +3342,9 @@
               src="assets/images/home/industries/plumbing.webp" alt="Plumber repairing pipes under a kitchen sink"
               width="1200" height="800" loading="lazy" decoding="async" /><span>Plumber</span></figure>
           <figure class="industry-card"><img data-cms-src="page.ind_hvac_image"
-              src="assets/images/home/industries/hvac.webp" alt="HVAC technician servicing heating and cooling equipment"
-              width="1200" height="800" loading="lazy" decoding="async" /><span>HVAC</span></figure>
+              src="assets/images/home/industries/hvac.webp"
+              alt="HVAC technician servicing heating and cooling equipment" width="1200" height="800" loading="lazy"
+              decoding="async" /><span>HVAC</span></figure>
           <figure class="industry-card"><img data-cms-src="page.ind_electrician_image"
               src="assets/images/home/industries/electrician.webp"
               alt="Electrician working on residential electrical installation" width="1200" height="800" loading="lazy"
@@ -3299,8 +3357,9 @@
               alt="Landscaper maintaining a residential lawn and garden" width="1200" height="800" loading="lazy"
               decoding="async" /><span>Landscaping / Lawn Care</span></figure>
           <figure class="industry-card"><img data-cms-src="page.ind_auto_image"
-              src="assets/images/home/industries/auto-repair.webp" alt="Auto technician working on a vehicle in a garage"
-              width="1200" height="800" loading="lazy" decoding="async" /><span>Auto
+              src="assets/images/home/industries/auto-repair.webp"
+              alt="Auto technician working on a vehicle in a garage" width="1200" height="800" loading="lazy"
+              decoding="async" /><span>Auto
               Repair / Car Detailing</span></figure>
           <figure class="industry-card"><img data-cms-src="page.ind_cleaning_image"
               src="assets/images/home/industries/cleaning.webp"
@@ -3341,30 +3400,21 @@
                 all in your account.</p>
             </div>
           </div>
+
           <div class="deliverable-card reveal">
             <div class="deliverable-shot">
-              <img data-cms-src="page.deliv_reviews_image" src="assets/images/home/deliverables/reviews.webp?v=13"
-                alt="Person reviewing Google customer reviews on a laptop" width="1920" height="1080" loading="lazy"
-                decoding="async" />
+              <img data-cms-src="page.deliv_neg_image"
+                src="assets/images/home/deliverables/remove-negative-reviews.webp?v=14"
+                alt="Illustration of removing a Google review from search results" width="1920" height="1080"
+                loading="lazy" decoding="async" />
             </div>
             <div class="p-6">
-              <h3 class="font-serif text-xl">Google Reviews</h3>
-              <p class="mt-2 body-lg text-muted">Review request system, staff guidance, and response templates for
-                authentic feedback.</p>
+              <h3 class="font-serif text-xl">Remove Negative Reviews</h3>
+              <p class="mt-2 body-lg text-muted">Careful review assessment, policy-compliant handling guidance, and
+                reputation support for harmful feedback.</p>
             </div>
           </div>
-          <div class="deliverable-card reveal">
-            <div class="deliverable-shot">
-              <img data-cms-src="page.deliv_ads_image" src="assets/images/home/deliverables/ads.webp?v=14"
-                alt="Google Ads logo on dark blue background" width="1920" height="1080" loading="lazy"
-                decoding="async" />
-            </div>
-            <div class="p-6">
-              <h3 class="font-serif text-xl">Google Ads</h3>
-              <p class="mt-2 body-lg text-muted">Campaign structure, keyword targeting, ad copy, conversion tracking,
-                and ongoing optimization.</p>
-            </div>
-          </div>
+
           <div class="deliverable-card reveal">
             <div class="deliverable-shot">
               <img data-cms-src="page.deliv_website_image" src="assets/images/home/deliverables/website.webp?v=14"
@@ -3377,6 +3427,7 @@
                 source-code ownership.</p>
             </div>
           </div>
+
           <div class="deliverable-card reveal">
             <div class="deliverable-shot">
               <img data-cms-src="page.deliv_local_image" src="assets/images/home/deliverables/local-seo.webp?v=14"
@@ -3389,17 +3440,30 @@
                 and clear next steps you can own.</p>
             </div>
           </div>
+
           <div class="deliverable-card reveal">
             <div class="deliverable-shot">
-              <img data-cms-src="page.deliv_neg_image"
-                src="assets/images/home/deliverables/remove-negative-reviews.webp?v=14"
-                alt="Illustration of removing a Google review from search results" width="1920" height="1080"
-                loading="lazy" decoding="async" />
+              <img data-cms-src="page.deliv_ads_image" src="assets/images/home/deliverables/ads.webp?v=14"
+                alt="Google Ads logo on dark blue background" width="1920" height="1080" loading="lazy"
+                decoding="async" />
             </div>
             <div class="p-6">
-              <h3 class="font-serif text-xl">Remove Negative Reviews</h3>
-              <p class="mt-2 body-lg text-muted">Careful review assessment, policy-compliant handling guidance, and
-                reputation support for harmful feedback.</p>
+              <h3 class="font-serif text-xl">Google Ads</h3>
+              <p class="mt-2 body-lg text-muted">Campaign structure, keyword targeting, ad copy, conversion tracking,
+                and ongoing optimization.</p>
+            </div>
+          </div>
+
+          <div class="deliverable-card reveal">
+            <div class="deliverable-shot">
+              <img data-cms-src="page.deliv_reviews_image" src="assets/images/home/deliverables/reviews.webp?v=13"
+                alt="Person reviewing Google customer reviews on a laptop" width="1920" height="1080" loading="lazy"
+                decoding="async" />
+            </div>
+            <div class="p-6">
+              <h3 class="font-serif text-xl">Google Reviews</h3>
+              <p class="mt-2 body-lg text-muted">Review request system, staff guidance, and response templates for
+                authentic feedback.</p>
             </div>
           </div>
         </div>
@@ -3424,8 +3488,8 @@
               </svg></div>
             <p class="text-xs tracking-[0.18em] text-ink/40">01</p>
             <h3 class="mt-2 font-serif text-xl" data-cms="page.process_1_title">Tell Us About Your Business</h3>
-            <p class="mt-3 text-sm leading-relaxed text-ink/60">Send your website, Google Business Profile, or business
-              details.</p>
+            <p class="mt-3 text-sm leading-relaxed text-ink/60">Tell us about your business, services, challenges, goals
+              & your website or Google Profile.</p>
           </div>
           <div class="reveal process-step rounded-2xl border border-line bg-white p-6">
             <div class="process-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -3448,7 +3512,8 @@
               </svg></div>
             <p class="text-xs tracking-[0.18em] text-ink/40">03</p>
             <h3 class="mt-2 font-serif text-xl" data-cms="page.process_3_title">We Build &amp; Optimize</h3>
-            <p class="mt-3 text-sm leading-relaxed text-ink/60">We implement the selected service.</p>
+            <p class="mt-3 text-sm leading-relaxed text-ink/60">We put the right strategy into action and optimize it to
+              improve visibility and results.</p>
           </div>
           <div class="reveal process-step rounded-2xl border border-line bg-white p-6">
             <div class="process-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -3458,7 +3523,8 @@
               </svg></div>
             <p class="text-xs tracking-[0.18em] text-ink/40">04</p>
             <h3 class="mt-2 font-serif text-xl" data-cms="page.process_4_title">You Get Full Access</h3>
-            <p class="mt-3 text-sm leading-relaxed text-ink/60">Your business assets stay under your control.</p>
+            <p class="mt-3 text-sm leading-relaxed text-ink/60">You keep full access and control of your website,
+              accounts, and business assets.</p>
           </div>
         </div>
         <div class="reveal mt-10">
@@ -3498,38 +3564,26 @@
                   designed to help customers find, understand, and contact the business.</span></p>
             </div>
           </article>
+
           <article class="work-row">
-            <p class="work-row-service">02 · Reputation</p>
+            <p class="work-row-service">02 · Reviews</p>
             <div>
-              <h3 class="work-row-title font-serif">Google Business Reviews &amp; Reputation Management</h3>
-              <p class="work-row-meta">Local Business · Google Business Reviews</p>
+              <h3 class="work-row-title font-serif">Remove Negative Reviews &amp; Reputation Management</h3>
+              <p class="work-row-meta">Local Business · Remove Negative Reviews</p>
             </div>
             <div class="work-steps">
-              <p class="work-step"><strong>Problem</strong><span>Few recent reviews and not enough customer feedback to
-                  build trust.</span></p>
-              <p class="work-step"><strong>Work</strong><span>Built a simple, ethical review-request strategy to make it
-                  easier for genuine customers to share their experience.</span></p>
-              <p class="work-step"><strong>Outcome</strong><span>A stronger review presence that helps future customers
-                  feel more confident choosing the business.</span></p>
+              <p class="work-step"><strong>Problem</strong><span>Harmful or unfair Google reviews were damaging trust
+                  and
+                  making new customers hesitate.</span></p>
+              <p class="work-step"><strong>Work</strong><span>Assessed the reviews carefully and followed a
+                  policy-compliant process to address what could be handled the right way.</span></p>
+              <p class="work-step"><strong>Outcome</strong><span>Clearer reputation support and a more careful path for
+                  dealing with damaging feedback.</span></p>
             </div>
           </article>
+
           <article class="work-row">
-            <p class="work-row-service">03 · Ads</p>
-            <div>
-              <h3 class="work-row-title font-serif">High-Intent Google Ads Campaigns</h3>
-              <p class="work-row-meta">Local Service Business · Google Ads</p>
-            </div>
-            <div class="work-steps">
-              <p class="work-step"><strong>Problem</strong><span>Broad targeting was attracting low-intent searches and
-                  wasting advertising budget.</span></p>
-              <p class="work-step"><strong>Work</strong><span>Built a focused campaign structure around relevant
-                  services, locations, search intent, landing pages, and conversion actions.</span></p>
-              <p class="work-step"><strong>Outcome</strong><span>A more focused path from Google search to qualified
-                  calls, enquiries, and bookings.</span></p>
-            </div>
-          </article>
-          <article class="work-row">
-            <p class="work-row-service">04 · Website</p>
+            <p class="work-row-service">03 · Website</p>
             <div>
               <h3 class="work-row-title font-serif">Mobile-First Local Business Website</h3>
               <p class="work-row-meta">Local Business · Web Design &amp; Development</p>
@@ -3543,8 +3597,9 @@
                   about the business and take action.</span></p>
             </div>
           </article>
+
           <article class="work-row">
-            <p class="work-row-service">05 · Local SEO</p>
+            <p class="work-row-service">04 · Local SEO</p>
             <div>
               <h3 class="work-row-title font-serif">Local Search &amp; Maps Visibility</h3>
               <p class="work-row-meta">Local Business · Local SEO</p>
@@ -3559,20 +3614,36 @@
                   customers discover and choose the business.</span></p>
             </div>
           </article>
+
           <article class="work-row">
-            <p class="work-row-service">06 · Reviews</p>
+            <p class="work-row-service">05 · Ads</p>
             <div>
-              <h3 class="work-row-title font-serif">Remove Negative Reviews Support</h3>
-              <p class="work-row-meta">Local Business · Remove Negative Reviews</p>
+              <h3 class="work-row-title font-serif">High-Intent Google Ads Campaigns</h3>
+              <p class="work-row-meta">Local Service Business · Google Ads</p>
             </div>
             <div class="work-steps">
-              <p class="work-step"><strong>Problem</strong><span>Harmful or unfair Google reviews were damaging trust
-                  and
-                  making new customers hesitate.</span></p>
-              <p class="work-step"><strong>Work</strong><span>Assessed the reviews carefully and followed a
-                  policy-compliant process to address what could be handled the right way.</span></p>
-              <p class="work-step"><strong>Outcome</strong><span>Clearer reputation support and a more careful path for
-                  dealing with damaging feedback.</span></p>
+              <p class="work-step"><strong>Problem</strong><span>Broad targeting was attracting low-intent searches and
+                  wasting advertising budget.</span></p>
+              <p class="work-step"><strong>Work</strong><span>Built a focused campaign structure around relevant
+                  services, locations, search intent, landing pages, and conversion actions.</span></p>
+              <p class="work-step"><strong>Outcome</strong><span>A more focused path from Google search to qualified
+                  calls, enquiries, and bookings.</span></p>
+            </div>
+          </article>
+
+          <article class="work-row">
+            <p class="work-row-service">06 · Reputation</p>
+            <div>
+              <h3 class="work-row-title font-serif">Google Business Reviews</h3>
+              <p class="work-row-meta">Local Business · Google Business Reviews</p>
+            </div>
+            <div class="work-steps">
+              <p class="work-step"><strong>Problem</strong><span>Few recent reviews and not enough customer feedback to
+                  build trust.</span></p>
+              <p class="work-step"><strong>Work</strong><span>Built a simple, ethical review-request strategy to make it
+                  easier for genuine customers to share their experience.</span></p>
+              <p class="work-step"><strong>Outcome</strong><span>A stronger review presence that helps future customers
+                  feel more confident choosing the business.</span></p>
             </div>
           </article>
         </div>
@@ -3585,9 +3656,8 @@
           <div class="trust-compact-intro">
             <p data-cms="page.trust_eyebrow" class="text-xs font-medium uppercase tracking-[0.22em] text-muted">Built
               around trust</p>
-            <h2 data-cms="page.trust_title" class="trust-compact-heading mt-2 font-serif tracking-tight">We believe
-              local marketing should be
-              transparent, measurable, and owned by the business.</h2>
+            <h2 data-cms="page.trust_title" class="trust-compact-heading mt-2 font-serif tracking-tight">Transparent,
+              measurable local marketing built around your business.</h2>
             <p class="trust-compact-lead font-serif tracking-tight">Your
               business should own its growth system.</p>
             <p class="trust-compact-note">Until we have permission to publish real client reviews,
@@ -3612,14 +3682,14 @@
             <article class="trust-principle">
               <p class="trust-principle-num">04</p>
               <h3 class="font-serif">Honest</h3>
-              <p>No fake reviews or manufactured proof.</p>
+              <p>Reputation management</p>
             </article>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="faq" class="section-pad border-t border-line px-5 lg:px-8">
+    <section id="faq" class="faq-accordion section-pad border-t border-line px-5 lg:px-8">
       <div class="faq-wrap mx-auto">
         <p data-cms="page.faq_eyebrow" class="text-xs font-medium uppercase tracking-[0.22em] text-muted">FAQ</p>
         <h2 data-cms="page.faq_title" class="section-heading mt-3 font-serif tracking-tight">Questions we hear before
@@ -3636,11 +3706,11 @@
               <p class="mt-3 text-muted">Six core services: <a class="underline underline-offset-4"
                   href="services/google-business-profile-setup.html">Google
                   Business Profile</a>, <a class="underline underline-offset-4"
-                  href="services/google-maps-review-management.html">Google Reviews</a>, <a
+                  href="services/remove-negative-reviews.html">Remove Negative
+                  Reviews</a>, <a class="underline underline-offset-4" href="services/web-development.html">Website
+                  Building</a>, <a class="underline underline-offset-4" href="services/local-seo.html">Local SEO</a>, <a
                   class="underline underline-offset-4" href="services/google-ads-campaigns.html">Google Ads</a>, and <a
-                  class="underline underline-offset-4" href="services/web-development.html">Website Building</a>, <a
-                  class="underline underline-offset-4" href="services/local-seo.html">Local SEO</a>, and <a
-                  class="underline underline-offset-4" href="services/remove-negative-reviews.html">Remove Negative
+                  class="underline underline-offset-4" href="services/google-maps-review-management.html">Google
                   Reviews</a>. Most
                 local
                 businesses need more than one over time.</p>
@@ -3657,15 +3727,6 @@
             </div>
           </details>
           <details class="py-5">
-            <summary class="flex items-center justify-between gap-4 font-medium">Do you buy Google reviews?<span
-                class="text-ink/30">+</span></summary>
-            <div class="faq-panel">
-              <p class="mt-3 text-muted">No. We never buy stars, farm accounts, or post fake
-                check-ins. Review work is a timed ask after a real job so customers who already used you can write what
-                they experienced.</p>
-            </div>
-          </details>
-          <details class="py-5">
             <summary class="flex items-center justify-between gap-4 font-medium">Can you help if I don't have a Google
               Business Profile?<span class="text-ink/30">+</span></summary>
             <div class="faq-panel">
@@ -3673,6 +3734,17 @@
                 — or fix an existing one that is thin, wrong, or unclaimed. Start with <a
                   class="underline underline-offset-4" href="services/google-business-profile-setup.html">Google
                   Business Profile setup</a>.</p>
+            </div>
+          </details>
+          <details class="py-5">
+            <summary class="flex items-center justify-between gap-4 font-medium">Can you help with negative or unfair
+              Google reviews?<span class="text-ink/30">+</span></summary>
+            <div class="faq-panel">
+              <p class="mt-3 text-muted">Yes. We can assess the review, help you respond
+                professionally, and guide you through appropriate reporting options when a review may violate Google's
+                policies. We do not buy reviews or promise guaranteed removal. See <a
+                  class="underline underline-offset-4" href="services/remove-negative-reviews.html">Remove Negative
+                  Reviews</a>.</p>
             </div>
           </details>
           <details class="py-5">
@@ -3685,11 +3757,30 @@
             </div>
           </details>
           <details class="py-5">
+            <summary class="flex items-center justify-between gap-4 font-medium">Do you need Local SEO if I already have
+              a Google Business Profile?<span class="text-ink/30">+</span></summary>
+            <div class="faq-panel">
+              <p class="mt-3 text-muted">Yes. A Google Business Profile and Local SEO support
+                different parts of local visibility. We can review your business information, services, local search
+                signals, website connection, and overall presence to identify what needs improvement. See <a
+                  class="underline underline-offset-4" href="services/local-seo.html">Local SEO</a>.</p>
+            </div>
+          </details>
+          <details class="py-5">
             <summary class="flex items-center justify-between gap-4 font-medium">Who pays for Google Ads?<span
                 class="text-ink/30">+</span></summary>
             <div class="faq-panel">
               <p class="mt-3 text-muted">You pay Google for media. Townloc builds and runs
                 the campaigns. We do not mark up a mystery ad budget. The invoice from Google is yours to see.</p>
+            </div>
+          </details>
+          <details class="py-5">
+            <summary class="flex items-center justify-between gap-4 font-medium">Do you buy Google reviews?<span
+                class="text-ink/30">+</span></summary>
+            <div class="faq-panel">
+              <p class="mt-3 text-muted">No. We never buy stars, farm accounts, or post fake
+                check-ins. Review work is a timed ask after a real job so customers who already used you can write what
+                they experienced.</p>
             </div>
           </details>
           <details class="py-5">
@@ -3769,12 +3860,12 @@
                   class="field-input w-full rounded-xl border border-line bg-paper/40 px-4 py-3 text-sm outline-none transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30">
                   <option value="">Choose one</option>
                   <option value="Google Business Profile">Google Business Profile</option>
-                  <option value="Google Reviews & Reputation Management">Google Reviews &amp; Reputation Management
-                  </option>
-                  <option value="Google Ads">Google Ads</option>
+                  <option value="Remove Negative Reviews">Remove Negative Reviews</option>
                   <option value="Website Design & Development">Website Design &amp; Development</option>
                   <option value="Local SEO">Local SEO</option>
-                  <option value="Remove Negative Reviews">Remove Negative Reviews</option>
+                  <option value="Google Ads">Google Ads</option>
+                  <option value="Google Reviews & Reputation Management">Google Reviews &amp; Reputation Management
+                  </option>
                   <option value="Not sure">Not sure</option>
                 </select>
               </label>
@@ -3811,7 +3902,8 @@
       <div class="footer-top">
         <div class="footer-col">
           <a href="index.html" class="footer-logo-link site-logo-link" aria-label="Townloc home">
-            <img class="site-logo site-logo-footer" src="assets/images/townloc-logo.png?v=6" alt="Townloc" width="165" height="49" decoding="async" />
+            <img class="site-logo site-logo-footer" src="assets/images/townloc-logo.png?v=6" alt="Townloc" width="165"
+              height="49" decoding="async" />
           </a>
           <p class="footer-tagline" data-cms="footer.tagline">Local Google marketing for businesses that already do good
             work — Google Business
@@ -3820,21 +3912,30 @@
         <div class="footer-col">
           <p class="footer-col-title">Services</p>
           <ul>
-            <li><a href="services/google-maps-review-management.html">Google Business Reviews</a></li>
             <li><a href="services/google-business-profile-setup.html">Google Business Profile</a></li>
-            <li><a href="services/google-ads-campaigns.html">Google Ads Campaigns</a></li>
+            <li><a href="services/remove-negative-reviews.html">Remove Negative Reviews</a></li>
             <li><a href="services/web-development.html">Web Design &amp; Development</a></li>
             <li><a href="services/local-seo.html">Local SEO</a></li>
-            <li><a href="services/remove-negative-reviews.html">Remove Negative Reviews</a></li>
+            <li><a href="services/google-ads-campaigns.html">Google Ads Campaigns</a></li>
+            <li><a href="services/google-maps-review-management.html">Google Business Reviews</a></li>
           </ul>
         </div>
         <div class="footer-col">
           <p class="footer-col-title">Contact</p>
           <ul class="footer-contact">
-            <li data-cms="footer.contactEmail1"><a class="footer-contact-link" href="mailto:hello@townloc.com"><img class="footer-contact-emoji" src="assets/images/icons/email.png?v=3" alt="" width="20" height="20" decoding="async" /><span>hello@townloc.com</span></a></li>
-            <li data-cms="footer.contactEmail2"><a class="footer-contact-link" href="mailto:contact@townloc.com"><img class="footer-contact-emoji" src="assets/images/icons/email.png?v=3" alt="" width="20" height="20" decoding="async" /><span>contact@townloc.com</span></a></li>
-            <li data-cms="footer.contactPhone"><a class="footer-contact-link" href="tel:123456789"><img class="footer-contact-emoji" src="assets/images/icons/phone.png?v=3" alt="" width="20" height="20" decoding="async" /><span>123456789</span></a></li>
-            <li data-cms="footer.contactWhatsapp"><a class="footer-contact-link" href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer"><img class="footer-contact-emoji footer-contact-wa" src="assets/images/icons/whatsapp.png?v=3" alt="" width="20" height="20" decoding="async" /><span>1234567890</span></a></li>
+            <li data-cms="footer.contactEmail1"><a class="footer-contact-link" href="mailto:hello@townloc.com"><img
+                  class="footer-contact-emoji" src="assets/images/icons/email.png?v=3" alt="" width="20" height="20"
+                  decoding="async" /><span>hello@townloc.com</span></a></li>
+            <li data-cms="footer.contactEmail2"><a class="footer-contact-link" href="mailto:contact@townloc.com"><img
+                  class="footer-contact-emoji" src="assets/images/icons/email.png?v=3" alt="" width="20" height="20"
+                  decoding="async" /><span>contact@townloc.com</span></a></li>
+            <li data-cms="footer.contactPhone"><a class="footer-contact-link" href="tel:123456789"><img
+                  class="footer-contact-emoji" src="assets/images/icons/phone.png?v=3" alt="" width="20" height="20"
+                  decoding="async" /><span>123456789</span></a></li>
+            <li data-cms="footer.contactWhatsapp"><a class="footer-contact-link" href="https://wa.me/1234567890"
+                target="_blank" rel="noopener noreferrer"><img class="footer-contact-emoji footer-contact-wa"
+                  src="assets/images/icons/whatsapp.png?v=3" alt="" width="20" height="20"
+                  decoding="async" /><span>1234567890</span></a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -3853,7 +3954,8 @@
         <p class="footer-guarantee-label" data-cms="footer.guaranteeLabel">Client Guarantee</p>
         <p class="footer-guarantee-text" data-cms="footer.guaranteeText">100% Full Access &amp; Source-Code Ownership
           <span>|</span> Free Cloudflare
-          Hosting &amp; SSL Setup <span>|</span> Pay Only for Your Domain</p>
+          Hosting &amp; SSL Setup <span>|</span> Pay Only for Your Domain
+        </p>
       </div>
       <div class="footer-bottom">
         <p data-cms="footer.copyrightName">© <span id="year"></span> Townloc. All rights reserved.</p>
@@ -3882,7 +3984,7 @@
     </form>
   </dialog>
 
-  <script src="assets/site.js?v=13" defer></script>
+  <script src="assets/site.js?v=17" defer></script>
   <script src="assets/cms.js" defer></script>
 </body>
 
