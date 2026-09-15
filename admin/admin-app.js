@@ -1449,7 +1449,12 @@
     }
     var bucket = getCmsBucket(section);
     wrap.querySelectorAll("[data-cms-key]").forEach(function (input) {
-      bucket[input.dataset.cmsKey] = input.value;
+      var key = input.dataset.cmsKey;
+      if (String(key).indexOf("footer:") === 0) {
+        getCmsBucket("footer")[key.slice(7)] = input.value;
+        return;
+      }
+      bucket[key] = input.value;
     });
   }
 
@@ -3212,7 +3217,7 @@
 
     var defs = getCmsFieldDefs(section);
     var bucket = getCmsBucket(section);
-    if (!defs.length) {
+    if (!defs.length && section !== "branding") {
       wrap.innerHTML = '<p class="cms-empty">No fields for this section.</p>';
       return;
     }
@@ -3229,10 +3234,45 @@
       shown++;
       appendField(def, bucket[def.key], brandGroup);
     });
+    if (shown) {
+      wrap.appendChild(brandGroup);
+    }
+
+    // Branding screen also shows footer Contact emails/phone/WhatsApp.
+    if (section === "branding" && filter !== "images") {
+      var footerDefs = getCmsFieldDefs("footer");
+      var footerBucket = getCmsBucket("footer");
+      if (footerDefs && footerDefs.length) {
+        var footerGroup = document.createElement("div");
+        footerGroup.className = "cms-group";
+        var footerHead = document.createElement("h4");
+        footerHead.className = "cms-group-heading";
+        footerHead.textContent = "Footer contact";
+        footerGroup.appendChild(footerHead);
+        var footerHint = document.createElement("p");
+        footerHint.className = "hint";
+        footerHint.textContent =
+          "These update the footer Contact list sitewide (emails, phone, WhatsApp).";
+        footerGroup.appendChild(footerHint);
+        footerDefs.forEach(function (def) {
+          shown++;
+          appendField(
+            {
+              key: "footer:" + def.key,
+              label: def.label,
+              type: def.type || "text",
+              hint: def.hint,
+            },
+            footerBucket[def.key],
+            footerGroup
+          );
+        });
+        wrap.appendChild(footerGroup);
+      }
+    }
+
     if (!shown) {
       wrap.innerHTML = '<p class="cms-empty">Nothing matches this filter.</p>';
-    } else {
-      wrap.appendChild(brandGroup);
     }
     var stB = $("cms-status");
     if (stB) stB.textContent = "Edit the fields below, then click Save to site.";
