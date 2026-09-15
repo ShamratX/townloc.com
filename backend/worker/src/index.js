@@ -520,9 +520,25 @@ function patchFooterContactLi(li, href, label) {
   return out;
 }
 
-/** Sitewide footer Contact list: emails, phone, WhatsApp. */
-function applyFooterContact(html, footer) {
-  if (!footer || typeof footer !== "object" || !html) return html;
+function replaceByClassInner(html, className, value, asHtml) {
+  const v = String(value || "").trim();
+  if (!v) return html;
+  const safe = asHtml ? v : escapeHtml(v);
+  const re = new RegExp(
+    `(<p\\b[^>]*\\b${className}\\b[^>]*>)([\\s\\S]*?)(<\\/p>)`,
+    "gi"
+  );
+  return String(html).replace(re, `$1${safe}$3`);
+}
+
+function formatGuaranteeHtml(text) {
+  return escapeHtml(String(text || "").trim()).replace(
+    /\s*\|\s*/g,
+    " <span>|</span> "
+  );
+}
+
+function applyFooterContactList(html, footer) {
   const email1 = String(footer.contactEmail1 || "").trim();
   const email2 = String(footer.contactEmail2 || "").trim();
   const phone = String(footer.contactPhone || "").trim();
@@ -555,6 +571,90 @@ function applyFooterContact(html, footer) {
       return `<ul${attrs}>${newInner}</ul>`;
     }
   );
+}
+
+/** Sitewide footer: tagline, columns, contact, guarantee, copyright, CTA. */
+function applyFooter(html, footer) {
+  if (!footer || typeof footer !== "object" || !html) return html;
+  let out = String(html);
+
+  out = replaceByClassInner(out, "footer-tagline", footer.tagline);
+  out = replaceByClassInner(out, "footer-guarantee-label", footer.guaranteeLabel);
+  const gText = String(footer.guaranteeText || "").trim();
+  if (gText) {
+    out = replaceByClassInner(out, "footer-guarantee-text", formatGuaranteeHtml(gText), true);
+  }
+
+  const servicesTitle = String(footer.servicesTitle || "").trim();
+  const contactTitle = String(footer.contactTitle || "").trim();
+  const companyTitle = String(footer.companyTitle || "").trim();
+  if (servicesTitle || contactTitle || companyTitle) {
+    let col = 0;
+    out = out.replace(
+      /(<p\b[^>]*\bfooter-col-title\b[^>]*>)([\s\S]*?)(<\/p>)/gi,
+      (full, open, _inner, close) => {
+        const idx = col++;
+        if (idx === 0 && servicesTitle) return `${open}${escapeHtml(servicesTitle)}${close}`;
+        if (idx === 1 && contactTitle) return `${open}${escapeHtml(contactTitle)}${close}`;
+        if (idx === 2 && companyTitle) return `${open}${escapeHtml(companyTitle)}${close}`;
+        return full;
+      }
+    );
+  }
+
+  out = applyFooterContactList(out, footer);
+
+  const copyrightText = String(footer.copyrightText || "").trim();
+  if (copyrightText) {
+    out = out.replace(
+      /(<div\b[^>]*\bfooter-bottom\b[^>]*>[\s\S]*?<p\b[^>]*>)([\s\S]*?)(<\/p>)/i,
+      `$1© <span id="year"></span> ${escapeHtml(copyrightText)}$3`
+    );
+  }
+
+  const ctaText = String(footer.ctaText || "").trim();
+  if (ctaText) {
+    out = out.replace(
+      /(<a\b[^>]*\bfooter-cta\b[^>]*>)([\s\S]*?)(<\/a>)/gi,
+      `$1${escapeHtml(ctaText)}$3`
+    );
+  }
+
+  return out;
+}
+
+function applyBranding(html, branding) {
+  if (!branding || typeof branding !== "object" || !html) return html;
+  let out = String(html);
+  const logo = String(branding.logoUrl || "").trim();
+  const name = String(branding.name || "").trim();
+
+  if (logo) {
+    out = out.replace(/<img\b([^>]*\bsite-logo\b[^>]*)>/gi, (full, attrs) => {
+      let next = attrs;
+      if (/\bsrc=/i.test(next)) {
+        next = next.replace(/\bsrc=(["'])[^"']*\1/i, (_m, q) => `src=${q}${logo}${q}`);
+      }
+      if (name && /\balt=/i.test(next)) {
+        next = next.replace(/\balt=(["'])[^"']*\1/i, (_m, q) => `alt=${q}${escapeHtml(name)}${q}`);
+      }
+      return `<img${next}>`;
+    });
+  }
+
+  const fav = String(branding.faviconUrl || "").trim();
+  if (fav && /rel=["']icon["']/i.test(out)) {
+    out = out.replace(
+      /(<link[^>]*rel=["']icon["'][^>]*href=["'])([^"']*)(["'])/i,
+      `$1${fav}$3`
+    );
+    out = out.replace(
+      /(<link[^>]*rel=["']apple-touch-icon["'][^>]*href=["'])([^"']*)(["'])/i,
+      `$1${fav}$3`
+    );
+  }
+
+  return out;
 }
 
 function slugify(value) {
@@ -2810,18 +2910,12 @@ async function serveAssetWithCms(request, env) {
       html = applyPageSeo(html, doc.pageSeo[pagePath]);
     }
 
-    if (doc.branding && doc.branding.faviconUrl) {
-      const fav = String(doc.branding.faviconUrl).trim();
-      if (fav && /rel=["']icon["']/i.test(html)) {
-        html = html.replace(
-          /(<link[^>]*rel=["']icon["'][^>]*href=["'])([^"']*)(["'])/i,
-          `$1${fav}$3`
-        );
-      }
+    if (doc.branding) {
+      html = applyBranding(html, doc.branding);
     }
 
     if (doc.footer) {
-      html = applyFooterContact(html, doc.footer);
+      html = applyFooter(html, doc.footer);
     }
   } catch (err) {
     console.error("CMS apply failed", err);

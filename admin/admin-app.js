@@ -713,7 +713,7 @@
   function cmsSectionTitle(section) {
     if (!section) return "Edit";
     if (section === "branding") return "Branding";
-    if (section === "footer") return "Footer contact";
+    if (section === "footer") return "Footer";
     if (section === "layout:header") return "Header text labels";
     if (section === "layout:footer") return "Footer text labels";
     if (section.indexOf("auto:") === 0) {
@@ -942,7 +942,7 @@
         section: "branding",
       });
       addRow({
-        title: "Footer contact",
+        title: "Footer",
         badge: "Sitewide",
         section: "footer",
       });
@@ -1295,10 +1295,22 @@
     }
     if (section === "footer") {
       var f = cmsState.cms.footer;
+      if (f.tagline == null)
+        f.tagline =
+          "Local Google marketing for businesses that already do good work — Google Business Profile, reviews, ads, and websites you own.";
+      if (f.servicesTitle == null) f.servicesTitle = "Services";
+      if (f.contactTitle == null) f.contactTitle = "Contact";
+      if (f.companyTitle == null) f.companyTitle = "Company";
       if (f.contactEmail1 == null) f.contactEmail1 = "hello@townloc.com";
       if (f.contactEmail2 == null) f.contactEmail2 = "contact@townloc.com";
       if (f.contactPhone == null) f.contactPhone = "123456789";
       if (f.contactWhatsapp == null) f.contactWhatsapp = "1234567890";
+      if (f.guaranteeLabel == null) f.guaranteeLabel = "Client Guarantee";
+      if (f.guaranteeText == null)
+        f.guaranteeText =
+          "100% Full Access & Source-Code Ownership | Free Cloudflare Hosting & SSL Setup | Pay Only for Your Domain";
+      if (f.copyrightText == null) f.copyrightText = "Townloc. All rights reserved.";
+      if (f.ctaText == null) f.ctaText = "Get a Free Assessment";
     }
     return cmsState.cms[section];
   }
@@ -1306,9 +1318,18 @@
   function getCmsFieldDefs(section) {
     if (!cmsState.fields) cmsState.fields = {};
     var defs = cmsState.fields[section] || [];
-    // Fallback if Worker is older than this admin UI (footer contact fields missing).
-    if (section === "footer" && (!defs || !defs.length)) {
+    // Fallback if Worker is older than this admin UI (footer fields missing/partial).
+    if (section === "footer" && (!defs || defs.length < 8)) {
       defs = [
+        {
+          key: "tagline",
+          label: "Footer tagline",
+          type: "textarea",
+          hint: "Text under the footer logo.",
+        },
+        { key: "servicesTitle", label: "Services column title", type: "text" },
+        { key: "contactTitle", label: "Contact column title", type: "text" },
+        { key: "companyTitle", label: "Company column title", type: "text" },
         {
           key: "contactEmail1",
           label: "Contact email 1",
@@ -1333,6 +1354,20 @@
           type: "text",
           hint: "Footer WhatsApp display text. Digits are used for wa.me link.",
         },
+        { key: "guaranteeLabel", label: "Guarantee label", type: "text" },
+        {
+          key: "guaranteeText",
+          label: "Guarantee text",
+          type: "textarea",
+          hint: "Use | to separate guarantee points.",
+        },
+        {
+          key: "copyrightText",
+          label: "Copyright text",
+          type: "text",
+          hint: "Shown after © year in the footer bottom.",
+        },
+        { key: "ctaText", label: "Footer CTA button", type: "text" },
       ];
       cmsState.fields.footer = defs;
     }
@@ -3247,12 +3282,12 @@
         footerGroup.className = "cms-group";
         var footerHead = document.createElement("h4");
         footerHead.className = "cms-group-heading";
-        footerHead.textContent = "Footer contact";
+        footerHead.textContent = "Footer";
         footerGroup.appendChild(footerHead);
         var footerHint = document.createElement("p");
         footerHint.className = "hint";
         footerHint.textContent =
-          "These update the footer Contact list sitewide (emails, phone, WhatsApp).";
+          "Customize the full footer: tagline, column titles, contact details, guarantee, copyright, and CTA. Logo comes from Branding above. Services/Company links are edited in Menus.";
         footerGroup.appendChild(footerHint);
         footerDefs.forEach(function (def) {
           shown++;

@@ -8,10 +8,20 @@ export const CMS_DEFAULTS = {
   },
   header: {},
   footer: {
+    tagline:
+      "Local Google marketing for businesses that already do good work — Google Business Profile, reviews, ads, and websites you own.",
+    servicesTitle: "Services",
+    contactTitle: "Contact",
+    companyTitle: "Company",
     contactEmail1: "hello@townloc.com",
     contactEmail2: "contact@townloc.com",
     contactPhone: "123456789",
     contactWhatsapp: "1234567890",
+    guaranteeLabel: "Client Guarantee",
+    guaranteeText:
+      "100% Full Access & Source-Code Ownership | Free Cloudflare Hosting & SSL Setup | Pay Only for Your Domain",
+    copyrightText: "Townloc. All rights reserved.",
+    ctaText: "Get a Free Assessment",
   },
   /** Auto-scanned header/footer menu overrides: { header: { "text:0": "…" }, footer: {…} } */
   layout: {
@@ -398,6 +408,27 @@ export const CMS_FIELD_META = {
   header: [],
   footer: [
     {
+      key: "tagline",
+      label: "Footer tagline",
+      type: "textarea",
+      hint: "Text under the footer logo.",
+    },
+    {
+      key: "servicesTitle",
+      label: "Services column title",
+      type: "text",
+    },
+    {
+      key: "contactTitle",
+      label: "Contact column title",
+      type: "text",
+    },
+    {
+      key: "companyTitle",
+      label: "Company column title",
+      type: "text",
+    },
+    {
       key: "contactEmail1",
       label: "Contact email 1",
       type: "text",
@@ -420,6 +451,28 @@ export const CMS_FIELD_META = {
       label: "WhatsApp number",
       type: "text",
       hint: "Footer WhatsApp display text. Digits are used for wa.me link.",
+    },
+    {
+      key: "guaranteeLabel",
+      label: "Guarantee label",
+      type: "text",
+    },
+    {
+      key: "guaranteeText",
+      label: "Guarantee text",
+      type: "textarea",
+      hint: "Use | to separate guarantee points.",
+    },
+    {
+      key: "copyrightText",
+      label: "Copyright text",
+      type: "text",
+      hint: "Shown after © year in the footer bottom.",
+    },
+    {
+      key: "ctaText",
+      label: "Footer CTA button",
+      type: "text",
     },
   ],
   pages: {
