@@ -143,6 +143,10 @@
 
     .nf-meta a:hover { color: #111111; }
 
+    .nf-copy {
+      animation: nf-fade-up 0.7s ease-out both;
+    }
+
     .nf-code {
       margin: 0;
       font-size: clamp(7rem, 28vw, 12rem);
@@ -151,13 +155,34 @@
       line-height: 0.9;
       color: #111111;
       text-align: center;
+      animation: nf-float 6.5s ease-in-out infinite;
+    }
+
+    @keyframes nf-fade-up {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes nf-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .nf-copy, .nf-code { animation: none; }
     }
   </style>
 </head>
 
 <body>
   <main class="nf-main" id="main">
-    <section>
+    <section class="nf-copy">
       <p class="nf-kicker">Error 404</p>
       <h1 class="nf-title">This page isn&rsquo;t on the map.</h1>
       <p class="nf-lead">
