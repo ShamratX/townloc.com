@@ -7,12 +7,12 @@
   <title>Page Not Found | Townloc</title>
   <meta name="description" content="The page you requested could not be found on townloc.com." />
   <meta name="robots" content="noindex, follow" />
-  <link rel="canonical" href="https://townloc.com/404.html" />
+  <link rel="canonical" href="https://townloc.com/404" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Townloc" />
   <meta property="og:title" content="Page Not Found | Townloc" />
   <meta property="og:description" content="The page you requested could not be found on townloc.com." />
-  <meta property="og:url" content="https://townloc.com/404.html" />
+  <meta property="og:url" content="https://townloc.com/404" />
   <meta property="og:image" content="https://townloc.com/assets/images/townloc-og.png?v=1" />
   <meta property="og:image:alt" content="Page Not Found | Townloc" />
   <meta property="og:image:width" content="1200" />
@@ -25,26 +25,201 @@
   <link rel="apple-touch-icon" href="/assets/images/townloc-favicon.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/assets/tailwind.js"></script>
   <script>document.documentElement.classList.add("js");</script>
   <link rel="stylesheet" href="/assets/site.css?v=65" />
+  <style>
+    .nf-page {
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse 80% 60% at 85% 40%, rgba(0, 182, 122, 0.08), transparent 55%),
+        radial-gradient(ellipse 50% 40% at 10% 80%, rgba(17, 17, 17, 0.04), transparent 50%),
+        #ffffff;
+    }
+    .nf-header {
+      border-bottom: 1px solid rgba(17, 17, 17, 0.08);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+    }
+    .nf-kicker {
+      letter-spacing: 0.18em;
+      font-weight: 700;
+      font-size: 0.75rem;
+      color: #111111;
+    }
+    .nf-code {
+      font-size: clamp(6.5rem, 18vw, 10.5rem);
+      line-height: 0.9;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: #111111;
+    }
+    .nf-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 3rem;
+      padding: 0.75rem 1.75rem;
+      border-radius: 999px;
+      background: #111111;
+      color: #ffffff !important;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .nf-cta:hover {
+      background: #222222;
+      transform: translateY(-1px);
+      color: #ffffff !important;
+    }
+    .nf-cta-blue {
+      background: #2563eb;
+    }
+    .nf-cta-blue:hover {
+      background: #1d4ed8;
+    }
+    .nf-art {
+      position: relative;
+      width: min(100%, 28rem);
+      aspect-ratio: 1;
+      margin-inline: auto;
+    }
+    .nf-shape {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      will-change: transform;
+    }
+    .nf-s1 {
+      width: 42%;
+      height: 28%;
+      left: 8%;
+      top: 18%;
+      border-radius: 999px;
+      background: #f07167;
+      transform: rotate(-28deg);
+      animation: nf-float-a 7s ease-in-out infinite;
+    }
+    .nf-s2 {
+      width: 34%;
+      height: 34%;
+      right: 10%;
+      top: 8%;
+      border-radius: 1.25rem;
+      background: #1f4d3a;
+      clip-path: polygon(12% 8%, 92% 0%, 100% 78%, 70% 100%, 0% 88%, 8% 30%);
+      animation: nf-float-b 8.5s ease-in-out infinite;
+    }
+    .nf-s3 {
+      width: 26%;
+      height: 26%;
+      left: 18%;
+      bottom: 22%;
+      border-radius: 999px;
+      background: #d7f0ff;
+      animation: nf-float-c 6.5s ease-in-out infinite;
+    }
+    .nf-s4 {
+      width: 24%;
+      height: 24%;
+      right: 22%;
+      bottom: 18%;
+      border-radius: 999px;
+      background: #e8f8ef;
+      animation: nf-float-a 9s ease-in-out infinite reverse;
+    }
+    .nf-s5 {
+      width: 22%;
+      height: 22%;
+      right: 8%;
+      top: 42%;
+      border-radius: 1rem;
+      background: #efe8d8;
+      animation: nf-float-b 7.5s ease-in-out infinite;
+    }
+    .nf-cursor {
+      width: 14%;
+      left: 48%;
+      top: 46%;
+      animation: nf-float-c 5.5s ease-in-out infinite;
+      filter: drop-shadow(0 8px 16px rgba(17, 17, 17, 0.18));
+    }
+    @keyframes nf-float-a {
+      0%, 100% { transform: translateY(0) rotate(-28deg); }
+      50% { transform: translateY(-12px) rotate(-24deg); }
+    }
+    @keyframes nf-float-b {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(10px); }
+    }
+    @keyframes nf-float-c {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(6px, -10px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .nf-s1, .nf-s2, .nf-s3, .nf-s4, .nf-s5, .nf-cursor { animation: none; }
+    }
+  </style>
 </head>
 
-<body class="bg-paper text-ink antialiased">
-  <div class="grain" aria-hidden="true"></div>
-  <main id="main" class="mx-auto flex min-h-[70vh] max-w-3xl flex-col justify-center px-5 py-24 lg:px-8">
-    <p class="text-xs font-medium uppercase tracking-[0.22em] text-ink/45">Error 404</p>
-    <h1 class="mt-4 font-serif text-4xl tracking-tight sm:text-5xl">Page not found</h1>
-    <p class="mt-5 max-w-xl text-base leading-relaxed text-ink/65">
-      The page you are looking for does not exist or may have moved.
-    </p>
-    <div class="mt-8 flex flex-wrap gap-3">
-      <a href="/" class="btn-primary">Back to Home</a>
-      <a href="/services/" class="btn-secondary">View Services</a>
+<body class="nf-page text-ink antialiased">
+  <a href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:bg-ink focus:px-4 focus:py-2 focus:text-paper">Skip
+    to content</a>
+
+  <header class="nf-header sticky top-0 z-40">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
+      <a href="/" class="site-logo-link flex items-center" aria-label="Townloc home">
+        <img class="site-logo site-logo-header" src="/assets/images/townloc-logo.png?v=6" alt="Townloc" width="151"
+          height="45" decoding="sync" fetchpriority="high" />
+      </a>
+      <a href="/#contact" class="nf-cta nf-cta-blue !min-h-10 !px-5 !text-sm">Get Started</a>
+    </div>
+  </header>
+
+  <main id="main"
+    class="mx-auto grid min-h-[calc(100vh-4.5rem)] max-w-7xl items-center gap-12 px-5 py-16 lg:grid-cols-2 lg:gap-8 lg:px-8 lg:py-10">
+    <div class="max-w-xl">
+      <p class="nf-kicker">ERROR: PAGE NOT FOUND</p>
+      <p class="nf-code mt-4" aria-hidden="true">404</p>
+      <h1 class="mt-2 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">This page isn&rsquo;t available.</h1>
+      <p class="mt-4 max-w-md text-base leading-relaxed text-ink/60">
+        The link may be broken, or the page may have moved. Head home or explore our services.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="/" class="nf-cta">Go to Townloc.com</a>
+        <a href="/services/" class="btn-secondary">View Services</a>
+      </div>
+    </div>
+
+    <div class="nf-art" aria-hidden="true">
+      <span class="nf-shape nf-s1"></span>
+      <span class="nf-shape nf-s2"></span>
+      <span class="nf-shape nf-s3">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M7 11V8a5 5 0 0 1 10 0v3" stroke="#1d4ed8" stroke-width="1.8" stroke-linecap="round" />
+          <rect x="5" y="11" width="14" height="10" rx="2" stroke="#1d4ed8" stroke-width="1.8" />
+        </svg>
+      </span>
+      <span class="nf-shape nf-s4">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 3l1.2 3.8L17 8l-3.8 1.2L12 13l-1.2-3.8L7 8l3.8-1.2L12 3z" fill="#00b67a" />
+          <path d="M18 13l.7 2.2L21 16l-2.3.7L18 19l-.7-2.3L15 16l2.3-.8L18 13z" fill="#00b67a" />
+        </svg>
+      </span>
+      <span class="nf-shape nf-s5">
+        <span class="text-lg font-bold tracking-tight text-ink/80">Aa</span>
+      </span>
+      <svg class="nf-shape nf-cursor" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M4 3l7.5 17 2-6.5L20 11 4 3z" fill="#f5c518" stroke="#111" stroke-width="1.2"
+          stroke-linejoin="round" />
+      </svg>
     </div>
   </main>
+
   <script src="/assets/site.js?v=17"></script>
 </body>
 
