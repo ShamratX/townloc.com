@@ -29,6 +29,11 @@ import {
   normalizeMenuHref,
   normalizeCustomMenusDoc,
 } from "./cmsLayout.js";
+import {
+  extractFooterFromHtml,
+  extractLogoFromHtml,
+  mergeCapturedSiteChrome,
+} from "./footerCapture.js";
 
 const LAYOUT_SOURCE = "index.html";
 
@@ -2262,8 +2267,26 @@ async function handlePublicCms(env, origin) {
   return json({ success: true, cms: data }, 200, origin);
 }
 
+async function seedSiteChromeFromHtml(env, doc) {
+  try {
+    const html = await readPageHtml(env, LAYOUT_SOURCE);
+    if (!html) return { doc, changed: false, captured: false };
+    const capturedFooter = extractFooterFromHtml(html);
+    const capturedLogo = extractLogoFromHtml(html);
+    const merged = mergeCapturedSiteChrome(doc, capturedFooter, capturedLogo);
+    if (!merged.changed) return { doc, changed: false, captured: true };
+    await writeCmsDocument(env, merged.doc);
+    return { doc: merged.doc, changed: true, captured: true };
+  } catch (err) {
+    console.error("footer auto-capture failed", err);
+    return { doc, changed: false, captured: false };
+  }
+}
+
 async function handleAdminCmsGet(env, origin) {
-  const data = await readCmsDocument(env);
+  let data = await readCmsDocument(env);
+  const seeded = await seedSiteChromeFromHtml(env, data);
+  if (seeded.changed) data = seeded.doc;
   return json(
     {
       success: true,
@@ -2273,6 +2296,8 @@ async function handleAdminCmsGet(env, origin) {
       customPages: customPagesFromDoc(data),
       customMenus: customMenusFromDoc(data),
       mode: "auto+sitewide",
+      footerCaptured: !!seeded.captured,
+      footerSeeded: !!seeded.changed,
     },
     200,
     origin
