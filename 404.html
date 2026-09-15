@@ -28,12 +28,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --nf-ink: #0c0c0c;
-      --nf-paper: #f4f4f2;
-      --nf-muted: rgba(244, 244, 242, 0.62);
-      --nf-line: rgba(244, 244, 242, 0.12);
+      --nf-ink: #111111;
+      --nf-paper: #ffffff;
+      --nf-muted: rgba(17, 17, 17, 0.58);
+      --nf-line: rgba(17, 17, 17, 0.1);
       --nf-trust: #00b67a;
-      --nf-trust-dim: rgba(0, 182, 122, 0.18);
+      --nf-trust-dim: rgba(0, 182, 122, 0.12);
     }
 
     * { box-sizing: border-box; }
@@ -45,8 +45,8 @@
 
     body {
       font-family: Outfit, system-ui, sans-serif;
-      color: var(--nf-paper);
-      background: var(--nf-ink);
+      color: var(--nf-ink);
+      background: #ffffff;
       -webkit-font-smoothing: antialiased;
     }
 
@@ -54,10 +54,7 @@
       position: relative;
       min-height: 100vh;
       overflow: hidden;
-      background:
-        radial-gradient(ellipse 70% 55% at 78% 20%, var(--nf-trust-dim), transparent 58%),
-        radial-gradient(ellipse 55% 45% at 12% 88%, rgba(244, 244, 242, 0.05), transparent 52%),
-        linear-gradient(160deg, #101010 0%, #0c0c0c 48%, #141414 100%);
+      background: #ffffff;
     }
 
     .nf-grid {
@@ -65,11 +62,11 @@
       position: absolute;
       inset: 0;
       background-image:
-        linear-gradient(rgba(244, 244, 242, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(244, 244, 242, 0.035) 1px, transparent 1px);
+        linear-gradient(rgba(17, 17, 17, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(17, 17, 17, 0.035) 1px, transparent 1px);
       background-size: 72px 72px;
       mask-image: radial-gradient(ellipse 75% 70% at 50% 40%, #000 20%, transparent 75%);
-      opacity: 0.7;
+      opacity: 0.85;
     }
 
     .nf-glow {
@@ -82,7 +79,7 @@
       right: -6%;
       top: 12%;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(0, 182, 122, 0.22), transparent 68%);
+      background: radial-gradient(circle, var(--nf-trust-dim), transparent 68%);
       filter: blur(8px);
       animation: nf-pulse 8s ease-in-out infinite;
     }
@@ -112,7 +109,6 @@
       display: block;
       height: 40px;
       width: auto;
-      filter: brightness(0) invert(1);
     }
 
     .nf-top-cta {
@@ -123,16 +119,17 @@
       padding: 0 1.15rem;
       border-radius: 999px;
       border: 1px solid var(--nf-line);
-      color: var(--nf-paper);
+      color: var(--nf-ink);
       text-decoration: none;
       font-size: 0.875rem;
       font-weight: 600;
+      background: #ffffff;
       transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
     }
 
     .nf-top-cta:hover {
-      background: rgba(244, 244, 242, 0.08);
-      border-color: rgba(244, 244, 242, 0.28);
+      background: #f7f7f7;
+      border-color: rgba(17, 17, 17, 0.22);
       transform: translateY(-1px);
     }
 
@@ -175,7 +172,7 @@
       height: 0.45rem;
       border-radius: 999px;
       background: var(--nf-trust);
-      box-shadow: 0 0 0 4px rgba(0, 182, 122, 0.18);
+      box-shadow: 0 0 0 4px rgba(0, 182, 122, 0.16);
     }
 
     .nf-title {
@@ -185,7 +182,7 @@
       line-height: 1.02;
       letter-spacing: -0.04em;
       font-weight: 700;
-      color: #fff;
+      color: var(--nf-ink);
     }
 
     .nf-lead {
@@ -219,21 +216,21 @@
     .nf-btn:hover { transform: translateY(-1px); }
 
     .nf-btn-primary {
-      background: #fff;
-      color: #0c0c0c;
+      background: #111111;
+      color: #ffffff;
     }
 
-    .nf-btn-primary:hover { background: #ececec; }
+    .nf-btn-primary:hover { background: #222222; }
 
     .nf-btn-ghost {
       border: 1px solid var(--nf-line);
-      color: var(--nf-paper);
-      background: transparent;
+      color: var(--nf-ink);
+      background: #ffffff;
     }
 
     .nf-btn-ghost:hover {
-      border-color: rgba(244, 244, 242, 0.35);
-      background: rgba(244, 244, 242, 0.06);
+      border-color: rgba(17, 17, 17, 0.28);
+      background: #f7f7f7;
     }
 
     .nf-meta {
@@ -244,19 +241,19 @@
       padding-top: 1.35rem;
       border-top: 1px solid var(--nf-line);
       font-size: 0.85rem;
-      color: rgba(244, 244, 242, 0.45);
+      color: rgba(17, 17, 17, 0.42);
     }
 
     .nf-meta a {
-      color: rgba(244, 244, 242, 0.78);
+      color: rgba(17, 17, 17, 0.72);
       text-decoration: none;
       border-bottom: 1px solid transparent;
       transition: color 0.2s ease, border-color 0.2s ease;
     }
 
     .nf-meta a:hover {
-      color: #fff;
-      border-bottom-color: rgba(244, 244, 242, 0.35);
+      color: #111111;
+      border-bottom-color: rgba(17, 17, 17, 0.28);
     }
 
     .nf-panel {
@@ -264,10 +261,9 @@
       min-height: 280px;
       border: 1px solid var(--nf-line);
       border-radius: 1.5rem;
-      background:
-        linear-gradient(160deg, rgba(244, 244, 242, 0.05), rgba(244, 244, 242, 0.015));
+      background: #ffffff;
       overflow: hidden;
-      box-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.75);
+      box-shadow: 0 24px 60px -36px rgba(17, 17, 17, 0.28);
     }
 
     .nf-watermark {
@@ -281,7 +277,7 @@
       letter-spacing: -0.06em;
       line-height: 1;
       color: transparent;
-      -webkit-text-stroke: 1px rgba(244, 244, 242, 0.16);
+      -webkit-text-stroke: 1px rgba(17, 17, 17, 0.14);
       user-select: none;
       animation: nf-rise 1s ease-out both;
     }
@@ -294,11 +290,11 @@
       padding: 0.55rem 0.85rem;
       border-radius: 999px;
       border: 1px solid var(--nf-line);
-      background: rgba(12, 12, 12, 0.55);
+      background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(10px);
       font-size: 0.78rem;
       font-weight: 500;
-      color: rgba(244, 244, 242, 0.82);
+      color: rgba(17, 17, 17, 0.72);
       animation: nf-float 6.5s ease-in-out infinite;
     }
 
@@ -316,7 +312,7 @@
       position: absolute;
       inset: 18% 16%;
       border-radius: 50%;
-      border: 1px dashed rgba(244, 244, 242, 0.14);
+      border: 1px dashed rgba(17, 17, 17, 0.12);
       animation: nf-spin 28s linear infinite;
     }
 
@@ -330,7 +326,7 @@
       top: 8%;
       left: 50%;
       transform: translateX(-50%);
-      box-shadow: 0 0 0 6px rgba(0, 182, 122, 0.15);
+      box-shadow: 0 0 0 6px rgba(0, 182, 122, 0.12);
     }
 
     @keyframes nf-pulse {
