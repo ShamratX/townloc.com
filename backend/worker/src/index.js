@@ -318,23 +318,63 @@ async function renamePagePath(env, doc, oldPath, nextSlugRaw) {
   pageRedirects[from] = to;
   delete pageRedirects[to];
 
-  let customPages = customPagesFromDoc(doc).map((entry) =>
-    entry && entry.path === from ? { ...entry, path: to } : entry
-  );
+  const fromEntry = customPagesFromDoc(doc).find((e) => e && e.path === from);
+  const builtinSource =
+    (fromEntry && fromEntry.builtinSource) ||
+    (PAGE_ALLOWLIST_SET.has(from) ? from : null);
+
+  // Move matching entry; drop other built-in clones of the same source (never
+  // touch user-created pages that have no builtinSource).
+  let customPages = [];
+  for (const entry of customPagesFromDoc(doc)) {
+    if (!entry || !entry.path) continue;
+    if (entry.path === from) {
+      customPages.push({
+        ...entry,
+        path: to,
+        builtinSource: builtinSource || entry.builtinSource,
+        title:
+          resolvePageName(doc, from, newSlug) ||
+          entry.title ||
+          newSlug,
+      });
+      continue;
+    }
+    if (
+      builtinSource &&
+      entry.builtinSource &&
+      entry.builtinSource === builtinSource
+    ) {
+      // orphan clone from a prior rename — drop from CMS list only
+      continue;
+    }
+    customPages.push(entry);
+  }
   if (
-    PAGE_ALLOWLIST_SET.has(from) &&
+    builtinSource &&
     !customPages.some((x) => x && x.path === to)
   ) {
-    customPages = [
-      ...customPages,
-      {
-        path: to,
-        title: resolvePageName(doc, from, newSlug),
-        builtinSource: from,
-        created_at: new Date().toISOString(),
-      },
-    ];
+    customPages.push({
+      path: to,
+      title: resolvePageName(doc, from, newSlug),
+      builtinSource,
+      created_at: new Date().toISOString(),
+    });
   }
+
+  // If we dropped intermediate clone paths, clear their CMS maps too.
+  const keptCustom = new Set(
+    customPages.map((e) => e && e.path).filter(Boolean)
+  );
+  customPagesFromDoc(doc).forEach((entry) => {
+    if (!entry || !entry.path || keptCustom.has(entry.path)) return;
+    if (!(builtinSource && entry.builtinSource === builtinSource)) return;
+    const dead = entry.path;
+    delete pageSections[dead];
+    delete pageSeo[dead];
+    delete pageNames[dead];
+    delete autoPages[dead];
+  });
 
   const menus = rewriteMenuHrefsForMovedPage(
     customMenusFromDoc(doc),
@@ -595,23 +635,33 @@ function newMenuGroupId() {
 
 function editablePagePaths(doc) {
   const redirects = pageRedirectsFromDoc(doc);
-  const paths = PAGE_ALLOWLIST.map((p) => resolveRedirectPath(doc, p));
-  const seen = new Set(paths);
-  for (const page of customPagesFromDoc(doc)) {
-    const p = page && page.path ? String(page.path).replace(/^\/+/, "") : "";
-    if (p && !seen.has(p)) {
-      seen.add(p);
-      paths.push(p);
-    }
+  const redirectedAway = new Set(Object.keys(redirects));
+  const paths = [];
+  const seen = new Set();
+
+  function add(path) {
+    let p = String(path || "").replace(/^\/+/, "");
+    if (!p || redirectedAway.has(p)) return;
+    p = resolveRedirectPath(doc, p);
+    if (!p || seen.has(p) || redirectedAway.has(p)) return;
+    seen.add(p);
+    paths.push(p);
   }
-  // Keep redirect targets even if not yet in customPages
-  Object.values(redirects).forEach((to) => {
-    const p = String(to || "").replace(/^\/+/, "");
-    if (p && !seen.has(p)) {
-      seen.add(p);
-      paths.push(p);
+
+  for (const p of PAGE_ALLOWLIST) add(p);
+
+  for (const page of customPagesFromDoc(doc)) {
+    if (!page || !page.path) continue;
+    const p = String(page.path).replace(/^\/+/, "");
+    if (redirectedAway.has(p)) continue;
+    if (page.builtinSource) {
+      const canon = resolveRedirectPath(doc, page.builtinSource);
+      // Only list the current canonical path for a built-in lineage
+      if (canon && canon !== p) continue;
     }
-  });
+    add(p);
+  }
+
   return paths;
 }
 
@@ -623,6 +673,171 @@ function isEditablePage(path, doc) {
   if (Object.values(redirects).some((v) => String(v) === p)) return true;
   // Old path still "editable" only via redirect resolve for CMS open — prefer new path
   return false;
+}
+
+/**
+ * Collapse duplicate CMS rows created by renaming the same built-in page.
+ * Never removes user-created pages (no builtinSource).
+ */
+async function repairBuiltinPageDuplicates(env, doc) {
+  const customs = customPagesFromDoc(doc);
+  const redirects = { ...pageRedirectsFromDoc(doc) };
+  const pageNames = { ...pageNamesFromDoc(doc) };
+  const pageSeo = {
+    ...(doc.pageSeo && typeof doc.pageSeo === "object" ? doc.pageSeo : {}),
+  };
+  const autoPages = {
+    ...(doc.autoPages && typeof doc.autoPages === "object" ? doc.autoPages : {}),
+  };
+  const pageSections = {
+    ...(doc.pageSections && typeof doc.pageSections === "object"
+      ? doc.pageSections
+      : {}),
+  };
+
+  const userPages = [];
+  const bySource = new Map();
+  for (const entry of customs) {
+    if (!entry || !entry.path) continue;
+    if (!entry.builtinSource) {
+      userPages.push(entry);
+      continue;
+    }
+    const src = String(entry.builtinSource).replace(/^\/+/, "");
+    if (!bySource.has(src)) bySource.set(src, []);
+    bySource.get(src).push(entry);
+  }
+
+  // Also treat redirect keys as sources even if customPages missing
+  Object.keys(redirects).forEach((src) => {
+    if (!bySource.has(src)) bySource.set(src, []);
+  });
+
+  let changed = false;
+  const keptBuiltin = [];
+  const prunePaths = [];
+
+  for (const [source, group] of bySource.entries()) {
+    const candidates = group.slice();
+    const redirTo = redirects[source] ? String(redirects[source]) : "";
+    if (redirTo && !candidates.some((e) => e.path === redirTo)) {
+      candidates.push({
+        path: redirTo,
+        title: pageNames[redirTo] || "",
+        builtinSource: source,
+      });
+    }
+
+    if (!candidates.length) continue;
+
+    // Prefer: has HTML, then matches redirect target, then newest
+    const scored = [];
+    for (const cand of candidates) {
+      const html = await readPageHtml(env, cand.path);
+      const hasHtml = !!(html && String(html).length > 100);
+      scored.push({
+        cand,
+        hasHtml,
+        isRedir: !!(redirTo && cand.path === redirTo),
+        created: String(cand.created_at || ""),
+      });
+    }
+    scored.sort((a, b) => {
+      if (a.hasHtml !== b.hasHtml) return a.hasHtml ? -1 : 1;
+      if (a.isRedir !== b.isRedir) return a.isRedir ? -1 : 1;
+      return b.created.localeCompare(a.created);
+    });
+    const winner = scored[0] && scored[0].cand;
+    if (!winner || !winner.path) continue;
+
+    const winPath = String(winner.path).replace(/^\/+/, "");
+    if (source !== winPath) {
+      if (redirects[source] !== winPath) {
+        redirects[source] = winPath;
+        changed = true;
+      }
+    }
+    Object.keys(redirects).forEach((key) => {
+      if (redirects[key] === source) {
+        redirects[key] = winPath;
+        changed = true;
+      }
+    });
+
+    const title =
+      pageNames[winPath] ||
+      winner.title ||
+      resolvePageName(doc, source, winPath.replace(/\.html$/i, ""));
+    keptBuiltin.push({
+      path: winPath,
+      title,
+      builtinSource: source,
+      created_at: winner.created_at || new Date().toISOString(),
+      ...(winner.builder ? { builder: true } : {}),
+      ...(winner.description ? { description: winner.description } : {}),
+      ...(winner.imageUrl ? { imageUrl: winner.imageUrl } : {}),
+    });
+    if (title && pageNames[winPath] !== title) {
+      pageNames[winPath] = title;
+      changed = true;
+    }
+
+    for (const cand of candidates) {
+      const p = String(cand.path || "").replace(/^\/+/, "");
+      if (p && p !== winPath) prunePaths.push(p);
+    }
+  }
+
+  const nextCustom = [...userPages, ...keptBuiltin];
+  const before = JSON.stringify(customs);
+  const after = JSON.stringify(nextCustom);
+  if (before !== after) changed = true;
+
+  for (const dead of prunePaths) {
+    if (pageNames[dead]) {
+      delete pageNames[dead];
+      changed = true;
+    }
+    if (pageSeo[dead]) {
+      delete pageSeo[dead];
+      changed = true;
+    }
+    if (autoPages[dead]) {
+      delete autoPages[dead];
+      changed = true;
+    }
+    if (pageSections[dead]) {
+      delete pageSections[dead];
+      changed = true;
+    }
+    // Remove only D1 clones of built-in renames — never touch user pages
+    try {
+      await env.DB.prepare(`DELETE FROM pages WHERE path = ?`).bind(dead).run();
+    } catch (err) {
+      console.error("prune builtin clone html failed", dead, err);
+    }
+  }
+
+  if (!changed) return { doc, changed: false };
+
+  const merged = deepMerge(CMS_DEFAULTS, {
+    ...doc,
+    customPages: nextCustom,
+    pageRedirects: redirects,
+    pageNames,
+    pageSeo,
+    autoPages,
+    pageSections,
+  });
+  merged.customPages = nextCustom;
+  merged.pageRedirects = redirects;
+  merged.pageNames = pageNames;
+  merged.pageSeo = pageSeo;
+  merged.autoPages = autoPages;
+  merged.pageSections = pageSections;
+  if (doc.layout) merged.layout = doc.layout;
+  if (doc.customMenus) merged.customMenus = doc.customMenus;
+  return { doc: merged, changed: true };
 }
 
 async function writeCmsDocument(env, data) {
@@ -2601,6 +2816,15 @@ async function readCmsDocument(env) {
   } catch (err) {
     console.error("branding asset url repair failed", err);
   }
+  try {
+    const deduped = await repairBuiltinPageDuplicates(env, merged);
+    if (deduped.changed) {
+      merged = deduped.doc;
+      await writeCmsDocument(env, merged);
+    }
+  } catch (err) {
+    console.error("builtin page duplicate repair failed", err);
+  }
   cmsDocCache = { at: Date.now(), doc: merged };
   return merged;
 }
@@ -2744,8 +2968,9 @@ async function handleAdminCmsPut(request, env, origin) {
 
   // Auto page overrides: { path, values, seo? }
   if (body && body.autoPage && body.path) {
-    const path = String(body.path).replace(/^\/+/, "");
     const current = await readCmsDocument(env);
+    let path = String(body.path).replace(/^\/+/, "");
+    path = resolveRedirectPath(current, path);
     if (!isEditablePage(path, current)) {
       return json({ success: false, message: "Page not available." }, 400, origin);
     }
