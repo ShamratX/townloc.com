@@ -102,6 +102,38 @@ function customPagesFromDoc(doc) {
   return Array.isArray(doc && doc.customPages) ? doc.customPages : [];
 }
 
+function pageNamesFromDoc(doc) {
+  return doc && doc.pageNames && typeof doc.pageNames === "object"
+    ? doc.pageNames
+    : {};
+}
+
+function resolvePageName(doc, path, fallback) {
+  const p = String(path || "").replace(/^\/+/, "");
+  const named = String(pageNamesFromDoc(doc)[p] || "").trim();
+  if (named) return named;
+  const custom = customPagesFromDoc(doc).find((x) => x && x.path === p);
+  if (custom && String(custom.title || "").trim()) {
+    return String(custom.title).trim();
+  }
+  return String(fallback || "").trim();
+}
+
+function withUpdatedPageName(doc, path, name) {
+  const p = String(path || "").replace(/^\/+/, "");
+  const nextName = String(name || "").trim().slice(0, 120);
+  const pageNames = { ...pageNamesFromDoc(doc) };
+  if (nextName) pageNames[p] = nextName;
+  else delete pageNames[p];
+
+  const customPages = customPagesFromDoc(doc).map((entry) => {
+    if (!entry || entry.path !== p) return entry;
+    return nextName ? { ...entry, title: nextName } : entry;
+  });
+
+  return { pageNames, customPages };
+}
+
 function isManagedCustomPage(path, doc) {
   const p = String(path || "").replace(/^\/+/, "");
   if (!p || !/\.html$/i.test(p) || PAGE_ALLOWLIST_SET.has(p)) return false;
@@ -167,6 +199,9 @@ async function migrateCustomPagesToRoot(env, doc) {
   const pageSeo = {
     ...(doc.pageSeo && typeof doc.pageSeo === "object" ? doc.pageSeo : {}),
   };
+  const pageNames = {
+    ...(doc.pageNames && typeof doc.pageNames === "object" ? doc.pageNames : {}),
+  };
   const autoPages = {
     ...(doc.autoPages && typeof doc.autoPages === "object" ? doc.autoPages : {}),
   };
@@ -230,6 +265,10 @@ async function migrateCustomPagesToRoot(env, doc) {
       pageSeo[newPath] = pageSeo[oldPath];
       delete pageSeo[oldPath];
     }
+    if (pageNames[oldPath]) {
+      pageNames[newPath] = pageNames[oldPath];
+      delete pageNames[oldPath];
+    }
     if (autoPages[oldPath]) {
       autoPages[newPath] = autoPages[oldPath];
       delete autoPages[oldPath];
@@ -246,12 +285,14 @@ async function migrateCustomPagesToRoot(env, doc) {
     customPages: nextCustom,
     pageSections,
     pageSeo,
+    pageNames,
     autoPages,
     customMenus: menus,
   });
   merged.customPages = nextCustom;
   merged.pageSections = pageSections;
   merged.pageSeo = pageSeo;
+  merged.pageNames = pageNames;
   merged.autoPages = autoPages;
   merged.customMenus = menus;
   if (doc.layout) merged.layout = doc.layout;
@@ -1546,9 +1587,16 @@ async function handleAdminPageCreate(request, env, origin) {
       : {}),
     [path]: sections,
   };
-  const merged = deepMerge(CMS_DEFAULTS, { ...doc, customPages, pageSections });
+  const pageNames = { ...pageNamesFromDoc(doc), [path]: title };
+  const merged = deepMerge(CMS_DEFAULTS, {
+    ...doc,
+    customPages,
+    pageSections,
+    pageNames,
+  });
   merged.customPages = customPages;
   merged.pageSections = pageSections;
+  merged.pageNames = pageNames;
   if (doc.autoPages) merged.autoPages = doc.autoPages;
   if (doc.layout) merged.layout = doc.layout;
   if (doc.customMenus) merged.customMenus = doc.customMenus;
@@ -1638,6 +1686,10 @@ async function handleAdminPageDelete(request, env, origin) {
     merged.pageSeo = { ...doc.pageSeo };
     delete merged.pageSeo[path];
   }
+  if (doc.pageNames) {
+    merged.pageNames = { ...doc.pageNames };
+    delete merged.pageNames[path];
+  }
   if (doc.pageSections) {
     merged.pageSections = { ...doc.pageSections };
     delete merged.pageSections[path];
@@ -1673,6 +1725,7 @@ async function handleAdminPageSectionsGet(env, origin, pagePath) {
       ? doc.pageSections[path]
       : null;
   const hasBuilder = Array.isArray(stored) || !!(custom && custom.builder);
+  const title = resolvePageName(doc, path, (custom && custom.title) || path);
   return json(
     {
       success: true,
@@ -1680,7 +1733,10 @@ async function handleAdminPageSectionsGet(env, origin, pagePath) {
       builder: hasBuilder,
       sections: Array.isArray(stored) ? normalizeSections(stored) : null,
       sectionTypes: SECTION_TYPES,
-      page: custom || { path, title: path },
+      page: custom
+        ? { ...custom, title }
+        : { path, title },
+      pageName: title,
     },
     200,
     origin
@@ -1727,7 +1783,7 @@ async function handleAdminPageSectionsPut(request, env, origin) {
   const title =
     typeof body.title === "string" && body.title.trim()
       ? body.title.trim().slice(0, 120)
-      : entry.title || path;
+      : resolvePageName(doc, path, entry.title || path);
   const description =
     typeof body.description === "string"
       ? body.description.trim().slice(0, 500)
@@ -1736,6 +1792,7 @@ async function handleAdminPageSectionsPut(request, env, origin) {
     typeof body.imageUrl === "string"
       ? body.imageUrl.trim().slice(0, 500)
       : entry.imageUrl || "";
+  const named = withUpdatedPageName(doc, path, title);
 
   let sections;
   if (body.init === true && !Array.isArray(body.sections)) {
@@ -1781,7 +1838,9 @@ async function handleAdminPageSectionsPut(request, env, origin) {
     imageUrl,
     builder: true,
   };
-  const nextCustom = customPages.map((p) => (p && p.path === path ? entry : p));
+  const nextCustom = named.customPages.map((p) =>
+    p && p.path === path ? entry : p
+  );
   const pageSections = {
     ...(doc.pageSections && typeof doc.pageSections === "object"
       ? doc.pageSections
@@ -1792,9 +1851,11 @@ async function handleAdminPageSectionsPut(request, env, origin) {
     ...doc,
     customPages: nextCustom,
     pageSections,
+    pageNames: named.pageNames,
   });
   merged.customPages = nextCustom;
   merged.pageSections = pageSections;
+  merged.pageNames = named.pageNames;
   if (doc.autoPages) merged.autoPages = doc.autoPages;
   if (doc.layout) merged.layout = doc.layout;
   if (doc.customMenus) merged.customMenus = doc.customMenus;
@@ -2342,12 +2403,14 @@ async function handleAdminCmsScan(env, origin, pagePath) {
         ogImage: String(doc.pageSeo[path].ogImage || ""),
       }
       : { title: "", description: "", ogImage: "" };
+  const pageName = resolvePageName(doc, path, "");
   return json(
     {
       success: true,
       path,
       fields,
       seo,
+      pageName,
       counts: {
         total: fields.length,
         images: fields.filter((f) => f.kind === "img").length,
@@ -2442,10 +2505,29 @@ async function handleAdminCmsPut(request, env, origin) {
         ogImage: og,
       };
     }
-    const merged = deepMerge(CMS_DEFAULTS, { ...current, autoPages, pageSeo });
+    let pageNames = pageNamesFromDoc(current);
+    let customPages = customPagesFromDoc(current);
+    if (Object.prototype.hasOwnProperty.call(body, "pageName") ||
+        Object.prototype.hasOwnProperty.call(body, "name")) {
+      const named = withUpdatedPageName(
+        current,
+        path,
+        body.pageName != null ? body.pageName : body.name
+      );
+      pageNames = named.pageNames;
+      customPages = named.customPages;
+    }
+    const merged = deepMerge(CMS_DEFAULTS, {
+      ...current,
+      autoPages,
+      pageSeo,
+      pageNames,
+      customPages,
+    });
     merged.autoPages = autoPages;
     merged.pageSeo = pageSeo;
-    merged.customPages = customPagesFromDoc(current);
+    merged.pageNames = pageNames;
+    merged.customPages = customPages;
     if (current.layout) merged.layout = current.layout;
     if (current.customMenus) merged.customMenus = current.customMenus;
     await writeCmsDocument(env, merged);
@@ -2490,6 +2572,8 @@ async function handleAdminCmsPut(request, env, origin) {
   else if (current.layout) merged.layout = current.layout;
   if (incoming.customPages) merged.customPages = incoming.customPages;
   else merged.customPages = customPagesFromDoc(current);
+  if (incoming.pageNames) merged.pageNames = incoming.pageNames;
+  else if (current.pageNames) merged.pageNames = current.pageNames;
   if (incoming.customMenus) merged.customMenus = incoming.customMenus;
   else merged.customMenus = customMenusFromDoc(current);
   await writeCmsDocument(env, merged);

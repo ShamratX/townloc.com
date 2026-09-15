@@ -51,6 +51,7 @@
     layoutMenus: [],
     dirty: false,
     pageSeo: { title: "", description: "", ogImage: "" },
+    pageName: "",
     view: "list",
     pageFilter: "all",
     builder: false,
@@ -723,10 +724,22 @@
   }
 
   function cmsPageNiceName(path) {
+    var names =
+      (cmsState.cms &&
+        cmsState.cms.pageNames &&
+        typeof cmsState.cms.pageNames === "object" &&
+        cmsState.cms.pageNames) ||
+      {};
+    if (names[path] && String(names[path]).trim()) {
+      return String(names[path]).trim();
+    }
     var titleByPath = {};
     (cmsState.customPages || []).forEach(function (p) {
       if (p && p.path) titleByPath[p.path] = p.title || p.path;
     });
+    if (titleByPath[path] && String(titleByPath[path]).trim()) {
+      return String(titleByPath[path]).trim();
+    }
     if (path === "index.html") return "Home";
     if (path === "privacy.html") return "Privacy";
     if (path === "terms.html") return "Terms";
@@ -734,16 +747,13 @@
     if (path === "blog/index.html") return "Blog";
     if (path === "services/index.html") return "Services overview";
     if (path.indexOf("services/") === 0) {
-      return (
-        titleByPath[path] ||
-        path
-          .replace(/^services\//, "")
-          .replace(/\.html$/i, "")
-          .replace(/-/g, " ")
-          .replace(/\b\w/g, function (c) {
-            return c.toUpperCase();
-          })
-      );
+      return path
+        .replace(/^services\//, "")
+        .replace(/\.html$/i, "")
+        .replace(/-/g, " ")
+        .replace(/\b\w/g, function (c) {
+          return c.toUpperCase();
+        });
     }
     return path
       .replace(/\.html$/i, "")
@@ -1465,6 +1475,10 @@
     if (section.indexOf("auto:") === 0) {
       wrap.querySelectorAll("[data-cms-key]").forEach(function (input) {
         var key = input.dataset.cmsKey;
+        if (key === "pageName") {
+          cmsState.pageName = input.value;
+          return;
+        }
         if (String(key).indexOf("seo:") === 0) {
           if (!cmsState.pageSeo) {
             cmsState.pageSeo = { title: "", description: "", ogImage: "" };
@@ -2723,6 +2737,31 @@
       host.appendChild(box);
     }
 
+    function appendPageNameGroup(name, path) {
+      var group = document.createElement("div");
+      group.className = "cms-group";
+      var heading = document.createElement("h4");
+      heading.className = "cms-group-heading";
+      heading.textContent = "Page name";
+      group.appendChild(heading);
+      var hint = document.createElement("p");
+      hint.className = "hint";
+      hint.textContent =
+        "Name shown in this Pages list. Separate from Meta title (SEO) below.";
+      group.appendChild(hint);
+      appendField(
+        {
+          key: "pageName",
+          label: "Page name",
+          type: "text",
+          hint: path ? "File: " + path : "",
+        },
+        name || "",
+        group
+      );
+      wrap.appendChild(group);
+    }
+
     function appendSeoGroup(seo) {
       var group = document.createElement("div");
       group.className = "cms-group";
@@ -2797,6 +2836,20 @@
       wrap.appendChild(bar);
     }
 
+    function appendPageEditorChrome(path) {
+      appendPageToolbar(path);
+      var nameInput = document.querySelector(
+        '#cms-fields [data-cms-key="pageName"]'
+      );
+      if (nameInput && nameInput.value.trim()) {
+        cmsState.pageName = nameInput.value.trim();
+      }
+      appendPageNameGroup(
+        cmsState.pageName || cmsPageNiceName(path) || "",
+        path
+      );
+    }
+
     function sectionTypeLabel(type) {
       var found = (cmsState.sectionTypes || []).find(function (t) {
         return t.type === type;
@@ -2858,7 +2911,7 @@
           list[j] = tmp;
           markCmsDirty();
           wrap.innerHTML = "";
-          appendPageToolbar(pagePath);
+          appendPageEditorChrome(pagePath);
           renderSectionBuilder(wrap, pagePath);
         });
         return b;
@@ -2878,7 +2931,7 @@
         );
         markCmsDirty();
         wrap.innerHTML = "";
-        appendPageToolbar(pagePath);
+        appendPageEditorChrome(pagePath);
         renderSectionBuilder(wrap, pagePath);
       });
       actions.appendChild(remove);
@@ -3027,7 +3080,7 @@
           cmsState.builderSections.push(blank);
           markCmsDirty();
           host.innerHTML = "";
-          appendPageToolbar(pagePath);
+          appendPageEditorChrome(pagePath);
           renderSectionBuilder(host, pagePath);
         });
         addBar.appendChild(btn);
@@ -3148,8 +3201,13 @@
         if (secRes.builder && Array.isArray(secRes.sections)) {
           cmsState.builder = true;
           cmsState.builderSections = secRes.sections.slice();
+          cmsState.pageName =
+            (secRes.pageName ||
+              (secRes.page && secRes.page.title) ||
+              cmsPageNiceName(path) ||
+              "").trim();
           if ($("cms-field-filter-wrap")) $("cms-field-filter-wrap").hidden = true;
-          appendPageToolbar(path);
+          appendPageEditorChrome(path);
           renderSectionBuilder(wrap, path);
           updateCmsStatusHint();
           return;
@@ -3187,9 +3245,12 @@
           description: "",
           ogImage: "",
         };
+        cmsState.pageName =
+          (scanned.pageName || cmsPageNiceName(path) || "").trim();
         if (!(secRes.builder && Array.isArray(secRes.sections))) {
           if (!wrap.querySelector(".cms-page-toolbar")) appendPageToolbar(path);
         }
+        appendPageNameGroup(cmsState.pageName, path);
         appendSeoGroup(cmsState.pageSeo);
         var showText = filter === "all" || filter === "text";
         var showImages = filter === "all" || filter === "images";
@@ -3324,25 +3385,52 @@
       if (cmsState.builder && section.indexOf("auto:") === 0) {
         var bpath = section.slice(5);
         var page = cmsState.builderPage || {};
-        await Admin.api("PUT", "/api/admin/pages/sections", {
+        var pageNameInput = document.querySelector(
+          '#cms-fields [data-cms-key="pageName"]'
+        );
+        var nextTitle =
+          (pageNameInput && pageNameInput.value.trim()) ||
+          cmsState.pageName ||
+          page.title ||
+          cmsPageNiceName(bpath);
+        var secRes = await Admin.api("PUT", "/api/admin/pages/sections", {
           path: bpath,
           sections: cmsState.builderSections || [],
-          title: page.title || cmsPageNiceName(bpath),
+          title: nextTitle,
           description: page.description || "",
           imageUrl: page.imageUrl || "",
         });
+        if (secRes.page) cmsState.builderPage = secRes.page;
+        if (!cmsState.cms) cmsState.cms = {};
+        if (!cmsState.cms.pageNames) cmsState.cms.pageNames = {};
+        cmsState.cms.pageNames[bpath] = nextTitle;
+        cmsState.pageName = nextTitle;
+        cmsState.customPages = (cmsState.customPages || []).map(function (p) {
+          return p && p.path === bpath
+            ? Object.assign({}, p, { title: nextTitle })
+            : p;
+        });
+        if ($("cms-edit-title")) $("cms-edit-title").textContent = nextTitle;
         toast(
           "Sections saved. Open View on site (hard refresh) to check.",
           true
         );
       } else if (section.indexOf("auto:") === 0) {
         var path = section.slice(5);
-        await Admin.api("PUT", "/api/admin/cms", {
+        var saveRes = await Admin.api("PUT", "/api/admin/cms", {
           autoPage: true,
           path: path,
           values: cmsState.autoValues,
           seo: cmsState.pageSeo || {},
+          pageName: cmsState.pageName || "",
         });
+        if (saveRes.cms) {
+          cmsState.cms = saveRes.cms;
+          cmsState.customPages = saveRes.cms.customPages || cmsState.customPages;
+        }
+        if ($("cms-edit-title")) {
+          $("cms-edit-title").textContent = cmsPageNiceName(path);
+        }
         toast(
           "Page CMS saved for " +
             path +

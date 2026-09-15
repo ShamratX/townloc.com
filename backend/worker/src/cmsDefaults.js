@@ -77,6 +77,10 @@ export const CMS_DEFAULTS = {
   autoPages: {},
   /** User-created service pages: [{ path, title, description?, imageUrl?, created_at }] */
   customPages: [],
+  /** Editable display names for CMS pages: { "services/foo.html": "Foo" } */
+  pageNames: {},
+  pageSeo: {},
+  pageSections: {},
   pages: {
     home: {
       hero_eyebrow:
