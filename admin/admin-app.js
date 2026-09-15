@@ -1289,14 +1289,54 @@
   }
 
   function getCmsBucket(section) {
-    if (!cmsState.cms) return {};
-    if (!cmsState.cms[section]) cmsState.cms[section] = {};
+    if (!cmsState.cms) cmsState.cms = {};
+    if (!cmsState.cms[section] || typeof cmsState.cms[section] !== "object") {
+      cmsState.cms[section] = {};
+    }
+    if (section === "footer") {
+      var f = cmsState.cms.footer;
+      if (f.contactEmail1 == null) f.contactEmail1 = "hello@townloc.com";
+      if (f.contactEmail2 == null) f.contactEmail2 = "contact@townloc.com";
+      if (f.contactPhone == null) f.contactPhone = "123456789";
+      if (f.contactWhatsapp == null) f.contactWhatsapp = "1234567890";
+    }
     return cmsState.cms[section];
   }
 
   function getCmsFieldDefs(section) {
-    if (!cmsState.fields) return [];
-    return cmsState.fields[section] || [];
+    if (!cmsState.fields) cmsState.fields = {};
+    var defs = cmsState.fields[section] || [];
+    // Fallback if Worker is older than this admin UI (footer contact fields missing).
+    if (section === "footer" && (!defs || !defs.length)) {
+      defs = [
+        {
+          key: "contactEmail1",
+          label: "Contact email 1",
+          type: "text",
+          hint: "Shown first in the footer Contact list (mailto link).",
+        },
+        {
+          key: "contactEmail2",
+          label: "Contact email 2",
+          type: "text",
+          hint: "Shown second in the footer Contact list (mailto link).",
+        },
+        {
+          key: "contactPhone",
+          label: "Phone number",
+          type: "text",
+          hint: "Footer phone display text and tel: link.",
+        },
+        {
+          key: "contactWhatsapp",
+          label: "WhatsApp number",
+          type: "text",
+          hint: "Footer WhatsApp display text. Digits are used for wa.me link.",
+        },
+      ];
+      cmsState.fields.footer = defs;
+    }
+    return defs;
   }
 
   function collectBuilderSectionsFromDom() {
