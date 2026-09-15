@@ -131,7 +131,26 @@ export function extractLogoFromHtml(html) {
     raw.match(
       /<img\b[^>]*\bsrc=["']([^"']+)["'][^>]*\bsite-logo(?:-footer|-header)?\b/i
     );
-  return m ? String(m[1]).trim() : "";
+  return m ? normalizeSiteAssetUrl(m[1]) : "";
+}
+
+/**
+ * Site-relative asset paths must be root-absolute so nested pages
+ * (/services/..., /blog/...) do not resolve to /services/assets/...
+ */
+export function normalizeSiteAssetUrl(url) {
+  let u = String(url || "").trim();
+  if (!u) return "";
+  if (/^(https?:)?\/\//i.test(u) || /^data:/i.test(u) || /^blob:/i.test(u)) {
+    return u;
+  }
+  const qIndex = u.indexOf("?");
+  const query = qIndex >= 0 ? u.slice(qIndex) : "";
+  let path = qIndex >= 0 ? u.slice(0, qIndex) : u;
+  path = path.replace(/\\/g, "/").replace(/^\.\//, "");
+  while (path.startsWith("../")) path = path.slice(3);
+  if (!path.startsWith("/")) path = `/${path}`;
+  return path + query;
 }
 
 /** Fill only empty footer/branding keys from captured HTML values. */
@@ -151,16 +170,29 @@ export function mergeCapturedSiteChrome(doc, capturedFooter, capturedLogo) {
   });
   out.footer = footer;
 
-  const logo = String(capturedLogo || "").trim();
-  if (logo) {
-    const branding =
-      out.branding && typeof out.branding === "object" ? { ...out.branding } : {};
-    if (!String(branding.logoUrl || "").trim()) {
-      branding.logoUrl = logo;
-      out.branding = branding;
+  const branding =
+    out.branding && typeof out.branding === "object" ? { ...out.branding } : {};
+  const logo = normalizeSiteAssetUrl(capturedLogo || "");
+  if (logo && !String(branding.logoUrl || "").trim()) {
+    branding.logoUrl = logo;
+    changed = true;
+  }
+  // Repair previously captured relative logo/favicon paths.
+  if (branding.logoUrl) {
+    const fixed = normalizeSiteAssetUrl(branding.logoUrl);
+    if (fixed && fixed !== branding.logoUrl) {
+      branding.logoUrl = fixed;
       changed = true;
     }
   }
+  if (branding.faviconUrl) {
+    const fixedFav = normalizeSiteAssetUrl(branding.faviconUrl);
+    if (fixedFav && fixedFav !== branding.faviconUrl) {
+      branding.faviconUrl = fixedFav;
+      changed = true;
+    }
+  }
+  out.branding = branding;
 
   return { doc: out, changed };
 }

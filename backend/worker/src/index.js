@@ -33,6 +33,7 @@ import {
   extractFooterFromHtml,
   extractLogoFromHtml,
   mergeCapturedSiteChrome,
+  normalizeSiteAssetUrl,
 } from "./footerCapture.js";
 
 const LAYOUT_SOURCE = "index.html";
@@ -631,7 +632,7 @@ function applyFooter(html, footer) {
 function applyBranding(html, branding) {
   if (!branding || typeof branding !== "object" || !html) return html;
   let out = String(html);
-  const logo = String(branding.logoUrl || "").trim();
+  const logo = normalizeSiteAssetUrl(String(branding.logoUrl || "").trim());
   const name = String(branding.name || "").trim();
 
   if (logo) {
@@ -647,7 +648,7 @@ function applyBranding(html, branding) {
     });
   }
 
-  const fav = String(branding.faviconUrl || "").trim();
+  const fav = normalizeSiteAssetUrl(String(branding.faviconUrl || "").trim());
   if (fav && /rel=["']icon["']/i.test(out)) {
     out = out.replace(
       /(<link[^>]*rel=["']icon["'][^>]*href=["'])([^"']*)(["'])/i,
@@ -2258,6 +2259,15 @@ async function readCmsDocument(env) {
   } catch (err) {
     console.error("industries nav fix failed", err);
   }
+  try {
+    const repaired = mergeCapturedSiteChrome(merged, {}, "");
+    if (repaired.changed) {
+      merged = repaired.doc;
+      await writeCmsDocument(env, merged);
+    }
+  } catch (err) {
+    console.error("branding asset url repair failed", err);
+  }
   cmsDocCache = { at: Date.now(), doc: merged };
   return merged;
 }
@@ -2327,10 +2337,10 @@ async function handleAdminCmsScan(env, origin, pagePath) {
   const seo =
     doc.pageSeo && typeof doc.pageSeo[path] === "object"
       ? {
-          title: String(doc.pageSeo[path].title || ""),
-          description: String(doc.pageSeo[path].description || ""),
-          ogImage: String(doc.pageSeo[path].ogImage || ""),
-        }
+        title: String(doc.pageSeo[path].title || ""),
+        description: String(doc.pageSeo[path].description || ""),
+        ogImage: String(doc.pageSeo[path].ogImage || ""),
+      }
       : { title: "", description: "", ogImage: "" };
   return json(
     {
@@ -2620,7 +2630,7 @@ async function handleAdminMenuSave(request, env, origin) {
       typeof body.name === "string" && body.name.trim()
         ? body.name.trim().slice(0, 80)
         : String(body.region || "").toLowerCase() === "footer" ||
-            targetId === "menu_footer"
+          targetId === "menu_footer"
           ? "Footer Menu"
           : "Primary Menu";
     doc.menus.push({

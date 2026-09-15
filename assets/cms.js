@@ -9,23 +9,39 @@
     el.textContent = String(value);
   }
 
+  function normalizeSiteAssetUrl(url) {
+    var u = String(url || "").trim();
+    if (!u) return "";
+    if (/^(https?:)?\/\//i.test(u) || /^data:/i.test(u) || /^blob:/i.test(u)) {
+      return u;
+    }
+    var qIndex = u.indexOf("?");
+    var query = qIndex >= 0 ? u.slice(qIndex) : "";
+    var path = qIndex >= 0 ? u.slice(0, qIndex) : u;
+    path = path.replace(/\\/g, "/").replace(/^\.\//, "");
+    while (path.indexOf("../") === 0) path = path.slice(3);
+    if (path.charAt(0) !== "/") path = "/" + path;
+    return path + query;
+  }
+
   function setSrc(el, value) {
     if (!el || value == null || String(value).trim() === "") return;
-    el.setAttribute("src", String(value));
+    el.setAttribute("src", normalizeSiteAssetUrl(value));
   }
 
   function applyFavicon(url) {
-    if (!url || !String(url).trim()) return;
+    var href = normalizeSiteAssetUrl(url);
+    if (!href) return;
     var links = document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
     if (!links.length) {
       var link = document.createElement("link");
       link.rel = "icon";
-      link.href = url;
+      link.href = href;
       document.head.appendChild(link);
       return;
     }
     links.forEach(function (link) {
-      link.href = url;
+      link.href = href;
     });
   }
 
@@ -33,7 +49,7 @@
     if (!branding) return;
     applyFavicon(branding.faviconUrl);
 
-    var logo = branding.logoUrl && String(branding.logoUrl).trim();
+    var logo = branding.logoUrl && normalizeSiteAssetUrl(branding.logoUrl);
     if (logo) {
       document.querySelectorAll("img.site-logo").forEach(function (el) {
         setSrc(el, logo);
