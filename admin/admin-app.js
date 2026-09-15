@@ -986,12 +986,17 @@
     }
   }
 
-  async function openCmsEditor(section) {
+  async function openCmsEditor(section, opts) {
     if (!section) return;
-    var ok = await confirmDiscardCmsIfDirty(
-      "You have unsaved Site CMS changes. Discard them and open this item?"
-    );
-    if (!ok) return;
+    var skipConfirm = opts && opts.skipConfirm;
+    if (!skipConfirm) {
+      var ok = await confirmDiscardCmsIfDirty(
+        "You have unsaved Site CMS changes. Discard them and open this item?"
+      );
+      if (!ok) return;
+    } else {
+      cmsState.dirty = false;
+    }
     var sel = $("cms-section");
     if (sel) {
       // Ensure option exists for auto pages
@@ -3492,10 +3497,17 @@
           return p;
         });
         if ($("cms-edit-title")) $("cms-edit-title").textContent = nextTitle;
+        cmsState.dirty = false;
         if (newPath !== bpath) {
+          if (secRes.pages) cmsState.pages = secRes.pages;
+          else {
+            cmsState.pages = (cmsState.pages || []).map(function (p) {
+              return p === bpath ? newPath : p;
+            });
+          }
           fillCmsPageOptions();
-          await openCmsEditor("auto:" + newPath);
-          toast("Page link updated to /" + newPath.replace(/\.html$/i, ""), true);
+          await openCmsEditor("auto:" + newPath, { skipConfirm: true });
+          toast("Page saved. Link updated to /" + newPath.replace(/\.html$/i, ""), true);
         } else {
           toast(
             "Sections saved. Open View on site (hard refresh) to check.",
@@ -3517,14 +3529,22 @@
           cmsState.customPages = saveRes.cms.customPages || cmsState.customPages;
         }
         var savedPath = (saveRes && saveRes.path) || path;
+        if (saveRes.pages) cmsState.pages = saveRes.pages;
         if ($("cms-edit-title")) {
           $("cms-edit-title").textContent = cmsPageNiceName(savedPath);
         }
+        cmsState.dirty = false;
         if (savedPath !== path) {
+          if (!saveRes.pages) {
+            cmsState.pages = (cmsState.pages || []).map(function (p) {
+              return p === path ? savedPath : p;
+            });
+          }
           fillCmsPageOptions();
-          await openCmsEditor("auto:" + savedPath);
+          await openCmsEditor("auto:" + savedPath, { skipConfirm: true });
           toast(
-            "Page link updated to /" + savedPath.replace(/\.html$/i, ""),
+            "Page saved. Link updated to /" +
+              savedPath.replace(/\.html$/i, ""),
             true
           );
         } else {

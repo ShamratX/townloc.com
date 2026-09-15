@@ -2355,6 +2355,8 @@ async function handleAdminPageSectionsPut(request, env, origin) {
       sections,
       page: entry,
       cms: merged,
+      pages: editablePagePaths(merged),
+      customPages: customPagesFromDoc(merged),
       sectionTypes: SECTION_TYPES,
     },
     200,
@@ -3072,7 +3074,14 @@ async function handleAdminCmsPut(request, env, origin) {
     if (working.layout) merged.layout = working.layout;
     await writeCmsDocument(env, merged);
     return json(
-      { success: true, cms: merged, path: finalPath, renamed: finalPath !== path },
+      {
+        success: true,
+        cms: merged,
+        path: finalPath,
+        renamed: finalPath !== path,
+        pages: editablePagePaths(merged),
+        customPages: customPagesFromDoc(merged),
+      },
       200,
       origin
     );
