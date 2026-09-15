@@ -7,7 +7,12 @@ export const CMS_DEFAULTS = {
     faviconUrl: "/assets/images/townloc-favicon.png",
   },
   header: {},
-  footer: {},
+  footer: {
+    contactEmail1: "hello@townloc.com",
+    contactEmail2: "contact@townloc.com",
+    contactPhone: "123456789",
+    contactWhatsapp: "1234567890",
+  },
   /** Auto-scanned header/footer menu overrides: { header: { "text:0": "…" }, footer: {…} } */
   layout: {
     header: {},
@@ -391,7 +396,32 @@ export const CMS_FIELD_META = {
   ],
   // header/footer menus are auto-scanned (see layout) — not hardcoded per site
   header: [],
-  footer: [],
+  footer: [
+    {
+      key: "contactEmail1",
+      label: "Contact email 1",
+      type: "text",
+      hint: "Shown first in the footer Contact list (mailto link).",
+    },
+    {
+      key: "contactEmail2",
+      label: "Contact email 2",
+      type: "text",
+      hint: "Shown second in the footer Contact list (mailto link).",
+    },
+    {
+      key: "contactPhone",
+      label: "Phone number",
+      type: "text",
+      hint: "Footer phone display text and tel: link.",
+    },
+    {
+      key: "contactWhatsapp",
+      label: "WhatsApp number",
+      type: "text",
+      hint: "Footer WhatsApp display text. Digits are used for wa.me link.",
+    },
+  ],
   pages: {
     home: fieldsFromKeys(CMS_DEFAULTS.pages.home, homeLabels),
     services: [

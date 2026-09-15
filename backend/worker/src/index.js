@@ -507,6 +507,56 @@ function escapeHtml(str) {
     .replace(/"/g, "&quot;");
 }
 
+function patchFooterContactLi(li, href, label) {
+  const safeHref = String(href);
+  let out = li.replace(/href=(["'])[^"']*\1/i, (_m, q) => `href=${q}${safeHref}${q}`);
+  const safeLabel = escapeHtml(label);
+  if (/<span\b[^>]*>[\s\S]*?<\/span>/i.test(out)) {
+    out = out.replace(
+      /(<span\b[^>]*>)([\s\S]*?)(<\/span>)/i,
+      `$1${safeLabel}$3`
+    );
+  }
+  return out;
+}
+
+/** Sitewide footer Contact list: emails, phone, WhatsApp. */
+function applyFooterContact(html, footer) {
+  if (!footer || typeof footer !== "object" || !html) return html;
+  const email1 = String(footer.contactEmail1 || "").trim();
+  const email2 = String(footer.contactEmail2 || "").trim();
+  const phone = String(footer.contactPhone || "").trim();
+  const wa = String(footer.contactWhatsapp || "").trim();
+  if (!email1 && !email2 && !phone && !wa) return html;
+
+  return String(html).replace(
+    /<ul\b([^>]*\bfooter-contact\b[^>]*)>([\s\S]*?)<\/ul>/gi,
+    (full, attrs, inner) => {
+      let i = 0;
+      const newInner = inner.replace(/<li\b[^>]*>[\s\S]*?<\/li>/gi, (li) => {
+        const idx = i++;
+        if (idx === 0 && email1) {
+          return patchFooterContactLi(li, `mailto:${email1}`, email1);
+        }
+        if (idx === 1 && email2) {
+          return patchFooterContactLi(li, `mailto:${email2}`, email2);
+        }
+        if (idx === 2 && phone) {
+          const tel = phone.replace(/[^\d+]/g, "") || phone;
+          return patchFooterContactLi(li, `tel:${tel}`, phone);
+        }
+        if (idx === 3 && wa) {
+          const digits = wa.replace(/\D/g, "");
+          if (!digits) return li;
+          return patchFooterContactLi(li, `https://wa.me/${digits}`, wa);
+        }
+        return li;
+      });
+      return `<ul${attrs}>${newInner}</ul>`;
+    }
+  );
+}
+
 function slugify(value) {
   return String(value || "")
     .toLowerCase()
@@ -2768,6 +2818,10 @@ async function serveAssetWithCms(request, env) {
           `$1${fav}$3`
         );
       }
+    }
+
+    if (doc.footer) {
+      html = applyFooterContact(html, doc.footer);
     }
   } catch (err) {
     console.error("CMS apply failed", err);

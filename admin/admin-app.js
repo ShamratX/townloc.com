@@ -713,6 +713,7 @@
   function cmsSectionTitle(section) {
     if (!section) return "Edit";
     if (section === "branding") return "Branding";
+    if (section === "footer") return "Footer contact";
     if (section === "layout:header") return "Header text labels";
     if (section === "layout:footer") return "Footer text labels";
     if (section.indexOf("auto:") === 0) {
@@ -940,7 +941,12 @@
         badge: "Sitewide",
         section: "branding",
       });
-      shown += 1;
+      addRow({
+        title: "Footer contact",
+        badge: "Sitewide",
+        section: "footer",
+      });
+      shown += 2;
     }
 
     pages.forEach(function (path) {
@@ -3175,8 +3181,7 @@
     brandGroup.className = "cms-group";
     var brandHead = document.createElement("h4");
     brandHead.className = "cms-group-heading";
-    brandHead.textContent =
-      section === "branding" ? "Branding" : section.charAt(0).toUpperCase() + section.slice(1);
+    brandHead.textContent = cmsSectionTitle(section);
     brandGroup.appendChild(brandHead);
     defs.forEach(function (def) {
       if (filter === "images" && def.type !== "url") return;
