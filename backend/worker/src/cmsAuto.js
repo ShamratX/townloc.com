@@ -62,6 +62,30 @@ function setSrc(attrs, src) {
   return `${attrs} src="${safe}"`;
 }
 
+function setAttr(attrs, name, value) {
+  const safe = String(value).replace(/"/g, "%22");
+  const reDq = new RegExp(`(?:^|\\s)${name}\\s*=\\s*"[^"]*"`, "i");
+  const reSq = new RegExp(`(?:^|\\s)${name}\\s*=\\s*'[^']*'`, "i");
+  if (reDq.test(attrs)) {
+    return attrs.replace(reDq, (m) =>
+      m.replace(
+        new RegExp(`${name}\\s*=\\s*"[^"]*"`, "i"),
+        `${name}="${safe}"`
+      )
+    );
+  }
+  if (reSq.test(attrs)) {
+    const safeQ = String(value).replace(/'/g, "%27");
+    return attrs.replace(reSq, (m) =>
+      m.replace(
+        new RegExp(`${name}\\s*=\\s*'[^']*'`, "i"),
+        `${name}='${safeQ}'`
+      )
+    );
+  }
+  return `${attrs} ${name}="${safe}"`;
+}
+
 function getAttr(attrs, name) {
   const re = new RegExp(
     `(?:^|\\s)${name}\\s*=\\s*"([^"]*)"|(?:^|\\s)${name}\\s*=\\s*'([^']*)'`,
@@ -302,6 +326,22 @@ function collectOrdered(html, counters, group) {
         value: item.text,
         hadHtml: /<[a-z]/i.test(item.rawInner),
       });
+      if (item.tag === "a") {
+        const href = getAttr(item.attrs, "href") || "";
+        fields.push({
+          id: `${id}:href`,
+          legacyId: null,
+          kind: "link",
+          tag: "a",
+          type: "text",
+          group,
+          label: `Button link · ${item.text.slice(0, 40)}${
+            item.text.length > 40 ? "…" : ""
+          }`,
+          value: href,
+          hint: "Destination URL (e.g. /#contact or https://…)",
+        });
+      }
     } else {
       const n = counters.textI++;
       const legacyId = `text:${n}`;
@@ -382,12 +422,29 @@ export function applyEditables(html, overrides) {
       if (!isCtaCandidate(tag.toLowerCase(), attrs, text)) return full;
       const dataCms = getAttr(attrs, "data-cms");
       const stableId = stableTextId("cta", text, dataCms);
-      const next = pickOverride(overrides, stableId, null);
-      if (next == null || String(next).trim() === "") return full;
-      if (/<img\b|<svg\b/i.test(inner)) return full;
-      if (/<[a-z][\s\S]*?>/i.test(inner)) return full;
-      return `<${tag}${attrs}>${escapeHtml(
-        decodeBasicEntities(String(next).trim())
+      const nextLabel = pickOverride(overrides, stableId, null);
+      const nextHref =
+        tag.toLowerCase() === "a"
+          ? pickOverride(overrides, `${stableId}:href`, null)
+          : null;
+      let nextAttrs = attrs;
+      if (nextHref != null && String(nextHref).trim() !== "") {
+        nextAttrs = setAttr(attrs, "href", String(nextHref).trim());
+      }
+      if (nextLabel == null || String(nextLabel).trim() === "") {
+        if (nextAttrs === attrs) return full;
+        return `<${tag}${nextAttrs}>${inner}</${tag}>`;
+      }
+      if (/<img\b|<svg\b/i.test(inner)) {
+        if (nextAttrs === attrs) return full;
+        return `<${tag}${nextAttrs}>${inner}</${tag}>`;
+      }
+      if (/<[a-z][\s\S]*?>/i.test(inner)) {
+        if (nextAttrs === attrs) return full;
+        return `<${tag}${nextAttrs}>${inner}</${tag}>`;
+      }
+      return `<${tag}${nextAttrs}>${escapeHtml(
+        decodeBasicEntities(String(nextLabel).trim())
       )}</${tag}>`;
     }
   );

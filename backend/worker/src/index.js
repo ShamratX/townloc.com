@@ -134,6 +134,139 @@ function withUpdatedPageName(doc, path, name) {
   return { pageNames, customPages };
 }
 
+function publicHrefForPath(path) {
+  const p = String(path || "").replace(/^\/+/, "");
+  if (!p || p === "index.html") return "/";
+  if (/\/index\.html$/i.test(p)) return `/${p.replace(/\/index\.html$/i, "/")}`;
+  return `/${p.replace(/\.html$/i, "")}`;
+}
+
+/**
+ * Rename a managed custom page path (slug.html → new-slug.html).
+ * Moves D1 HTML + CMS maps + menu hrefs.
+ */
+async function renameCustomPagePath(env, doc, oldPath, nextSlugRaw) {
+  const from = String(oldPath || "").replace(/^\/+/, "");
+  if (!isManagedCustomPage(from, doc)) {
+    return { ok: false, message: "Only custom pages can change their URL." };
+  }
+  let slug = slugifyTitle(String(nextSlugRaw || "").trim());
+  if (!slug) {
+    return { ok: false, message: "Enter a page link (URL slug)." };
+  }
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+    return {
+      ok: false,
+      message: "Use a simple URL (letters, numbers, hyphens).",
+    };
+  }
+  if (RESERVED_ROOT_SLUGS.has(slug)) {
+    return {
+      ok: false,
+      message: "That URL is reserved. Choose a different link.",
+    };
+  }
+  const to = `${slug}.html`;
+  if (to === from) return { ok: true, doc, path: from, changed: false };
+  if (isEditablePage(to, doc) || isEditablePage(`services/${to}`, doc)) {
+    return {
+      ok: false,
+      message: "A page with this link already exists.",
+    };
+  }
+  const existing = await env.DB.prepare(`SELECT path FROM pages WHERE path = ?`)
+    .bind(to)
+    .first();
+  if (existing) {
+    return {
+      ok: false,
+      message: "A page with this link already exists.",
+    };
+  }
+
+  const row = await env.DB.prepare(`SELECT html FROM pages WHERE path = ?`)
+    .bind(from)
+    .first();
+  let html = row && typeof row.html === "string" ? row.html : "";
+  if (html) {
+    const oldHref = publicHrefForPath(from);
+    const newHref = publicHrefForPath(to);
+    const oldSlug = from.replace(/\.html$/i, "");
+    html = html
+      .replace(
+        new RegExp(`https://townloc\\.com${oldHref.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:\\.html)?`, "gi"),
+        `https://townloc.com${newHref}`
+      )
+      .replace(
+        new RegExp(`data-cms-page="${oldSlug.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`, "gi"),
+        `data-cms-page="${slug}"`
+      );
+    await env.DB.prepare(
+      `INSERT INTO pages (path, html, updated_at) VALUES (?, ?, datetime('now'))
+       ON CONFLICT(path) DO UPDATE SET html = excluded.html, updated_at = datetime('now')`
+    )
+      .bind(to, html)
+      .run();
+    await env.DB.prepare(`DELETE FROM pages WHERE path = ?`).bind(from).run();
+  }
+
+  const pageSections = {
+    ...(doc.pageSections && typeof doc.pageSections === "object"
+      ? doc.pageSections
+      : {}),
+  };
+  const pageSeo = {
+    ...(doc.pageSeo && typeof doc.pageSeo === "object" ? doc.pageSeo : {}),
+  };
+  const pageNames = { ...pageNamesFromDoc(doc) };
+  const autoPages = {
+    ...(doc.autoPages && typeof doc.autoPages === "object" ? doc.autoPages : {}),
+  };
+  if (pageSections[from]) {
+    pageSections[to] = pageSections[from];
+    delete pageSections[from];
+  }
+  if (pageSeo[from]) {
+    pageSeo[to] = pageSeo[from];
+    delete pageSeo[from];
+  }
+  if (pageNames[from]) {
+    pageNames[to] = pageNames[from];
+    delete pageNames[from];
+  }
+  if (autoPages[from]) {
+    autoPages[to] = autoPages[from];
+    delete autoPages[from];
+  }
+
+  const customPages = customPagesFromDoc(doc).map((entry) =>
+    entry && entry.path === from ? { ...entry, path: to } : entry
+  );
+  const menus = rewriteMenuHrefsForMovedPage(
+    customMenusFromDoc(doc),
+    from,
+    to
+  );
+
+  const merged = deepMerge(CMS_DEFAULTS, {
+    ...doc,
+    customPages,
+    pageSections,
+    pageSeo,
+    pageNames,
+    autoPages,
+    customMenus: menus,
+  });
+  merged.customPages = customPages;
+  merged.pageSections = pageSections;
+  merged.pageSeo = pageSeo;
+  merged.pageNames = pageNames;
+  merged.autoPages = autoPages;
+  merged.customMenus = menus;
+  if (doc.layout) merged.layout = doc.layout;
+  return { ok: true, doc: merged, path: to, changed: true };
+}
+
 function isManagedCustomPage(path, doc) {
   const p = String(path || "").replace(/^\/+/, "");
   if (!p || !/\.html$/i.test(p) || PAGE_ALLOWLIST_SET.has(p)) return false;
@@ -1780,10 +1913,32 @@ async function handleAdminPageSectionsPut(request, env, origin) {
     );
   }
 
+  let workDoc = doc;
+  let workPath = path;
+  if (
+    Object.prototype.hasOwnProperty.call(body, "pageSlug") ||
+    Object.prototype.hasOwnProperty.call(body, "slug")
+  ) {
+    const renamed = await renameCustomPagePath(
+      env,
+      workDoc,
+      workPath,
+      body.pageSlug != null ? body.pageSlug : body.slug
+    );
+    if (!renamed.ok) {
+      return json({ success: false, message: renamed.message }, 400, origin);
+    }
+    workDoc = renamed.doc;
+    workPath = renamed.path;
+    entry =
+      customPagesFromDoc(workDoc).find((p) => p && p.path === workPath) ||
+      entry;
+  }
+
   const title =
     typeof body.title === "string" && body.title.trim()
       ? body.title.trim().slice(0, 120)
-      : resolvePageName(doc, path, entry.title || path);
+      : resolvePageName(workDoc, workPath, entry.title || workPath);
   const description =
     typeof body.description === "string"
       ? body.description.trim().slice(0, 500)
@@ -1792,7 +1947,7 @@ async function handleAdminPageSectionsPut(request, env, origin) {
     typeof body.imageUrl === "string"
       ? body.imageUrl.trim().slice(0, 500)
       : entry.imageUrl || "";
-  const named = withUpdatedPageName(doc, path, title);
+  const named = withUpdatedPageName(workDoc, workPath, title);
 
   let sections;
   if (body.init === true && !Array.isArray(body.sections)) {
@@ -1812,7 +1967,7 @@ async function handleAdminPageSectionsPut(request, env, origin) {
   if (!templateHtml) {
     return json({ success: false, message: "Could not load page shell." }, 500, origin);
   }
-  const slug = path.replace(/^services\//i, "").replace(/\.html$/i, "");
+  const slug = workPath.replace(/^services\//i, "").replace(/\.html$/i, "");
   const compiled = compileServicePageFromSections(templateHtml, {
     title,
     slug,
@@ -1828,27 +1983,28 @@ async function handleAdminPageSectionsPut(request, env, origin) {
     `INSERT INTO pages (path, html, updated_at) VALUES (?, ?, datetime('now'))
      ON CONFLICT(path) DO UPDATE SET html = excluded.html, updated_at = datetime('now')`
   )
-    .bind(path, compiled.html)
+    .bind(workPath, compiled.html)
     .run();
 
   entry = {
     ...entry,
+    path: workPath,
     title,
     description,
     imageUrl,
     builder: true,
   };
   const nextCustom = named.customPages.map((p) =>
-    p && p.path === path ? entry : p
+    p && p.path === workPath ? entry : p
   );
   const pageSections = {
-    ...(doc.pageSections && typeof doc.pageSections === "object"
-      ? doc.pageSections
+    ...(workDoc.pageSections && typeof workDoc.pageSections === "object"
+      ? workDoc.pageSections
       : {}),
-    [path]: sections,
+    [workPath]: sections,
   };
   const merged = deepMerge(CMS_DEFAULTS, {
-    ...doc,
+    ...workDoc,
     customPages: nextCustom,
     pageSections,
     pageNames: named.pageNames,
@@ -1856,18 +2012,20 @@ async function handleAdminPageSectionsPut(request, env, origin) {
   merged.customPages = nextCustom;
   merged.pageSections = pageSections;
   merged.pageNames = named.pageNames;
-  if (doc.autoPages) merged.autoPages = doc.autoPages;
-  if (doc.layout) merged.layout = doc.layout;
-  if (doc.customMenus) merged.customMenus = doc.customMenus;
-  if (doc.pageSeo) merged.pageSeo = doc.pageSeo;
+  if (workDoc.autoPages) merged.autoPages = workDoc.autoPages;
+  if (workDoc.layout) merged.layout = workDoc.layout;
+  if (workDoc.customMenus) merged.customMenus = workDoc.customMenus;
+  if (workDoc.pageSeo) merged.pageSeo = workDoc.pageSeo;
   await writeCmsDocument(env, merged);
 
   return json(
     {
       success: true,
-      path,
+      path: workPath,
+      renamed: workPath !== path,
       sections,
       page: entry,
+      cms: merged,
       sectionTypes: SECTION_TYPES,
     },
     200,
@@ -2517,21 +2675,68 @@ async function handleAdminCmsPut(request, env, origin) {
       pageNames = named.pageNames;
       customPages = named.customPages;
     }
-    const merged = deepMerge(CMS_DEFAULTS, {
+    let working = {
       ...current,
       autoPages,
       pageSeo,
       pageNames,
       customPages,
-    });
-    merged.autoPages = autoPages;
-    merged.pageSeo = pageSeo;
-    merged.pageNames = pageNames;
-    merged.customPages = customPages;
-    if (current.layout) merged.layout = current.layout;
-    if (current.customMenus) merged.customMenus = current.customMenus;
+    };
+    working.autoPages = autoPages;
+    working.pageSeo = pageSeo;
+    working.pageNames = pageNames;
+    working.customPages = customPages;
+    if (current.layout) working.layout = current.layout;
+    if (current.customMenus) working.customMenus = current.customMenus;
+
+    let finalPath = path;
+    const wantsSlug =
+      Object.prototype.hasOwnProperty.call(body, "pageSlug") ||
+      Object.prototype.hasOwnProperty.call(body, "slug");
+    if (wantsSlug && isManagedCustomPage(path, working)) {
+      const renamed = await renameCustomPagePath(
+        env,
+        working,
+        path,
+        body.pageSlug != null ? body.pageSlug : body.slug
+      );
+      if (!renamed.ok) {
+        return json({ success: false, message: renamed.message }, 400, origin);
+      }
+      working = renamed.doc;
+      finalPath = renamed.path;
+      if (renamed.changed && finalPath !== path) {
+        const again = withUpdatedPageName(
+          working,
+          finalPath,
+          body.pageName != null
+            ? body.pageName
+            : body.name != null
+              ? body.name
+              : resolvePageName(working, finalPath, "")
+        );
+        working = {
+          ...working,
+          pageNames: again.pageNames,
+          customPages: again.customPages,
+        };
+      }
+    }
+
+    const merged = deepMerge(CMS_DEFAULTS, working);
+    merged.autoPages = working.autoPages;
+    merged.pageSeo = working.pageSeo;
+    merged.pageNames = working.pageNames;
+    merged.customPages = working.customPages;
+    if (working.pageSections) merged.pageSections = working.pageSections;
+    if (working.customMenus) merged.customMenus = working.customMenus;
+    if (working.layout) merged.layout = working.layout;
     await writeCmsDocument(env, merged);
-    return json({ success: true, cms: merged, path }, 200, origin);
+    return json(
+      { success: true, cms: merged, path: finalPath, renamed: finalPath !== path },
+      200,
+      origin
+    );
   }
 
   // Auto layout (header/footer menus): { layoutRegion: true, region, values }

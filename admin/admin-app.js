@@ -52,6 +52,7 @@
     dirty: false,
     pageSeo: { title: "", description: "", ogImage: "" },
     pageName: "",
+    pageSlug: "",
     view: "list",
     pageFilter: "all",
     builder: false,
@@ -1479,6 +1480,10 @@
           cmsState.pageName = input.value;
           return;
         }
+        if (key === "pageSlug") {
+          cmsState.pageSlug = input.value;
+          return;
+        }
         if (String(key).indexOf("seo:") === 0) {
           if (!cmsState.pageSeo) {
             cmsState.pageSeo = { title: "", description: "", ogImage: "" };
@@ -2646,11 +2651,12 @@
     function appendField(def, value, parent) {
       var host = parent || wrap;
       var isImage =
-        def.type === "url" ||
         def.kind === "img" ||
-        /image|logo|favicon|og_|_image|photo|src/i.test(
-          String(def.key || def.id || def.label || "")
-        );
+        (def.type === "url" && def.kind !== "link") ||
+        (def.kind !== "link" &&
+          /image|logo|favicon|og_|_image|photo|src/i.test(
+            String(def.key || def.id || def.label || "")
+          ));
       var box = document.createElement("div");
       box.className =
         "cms-field " + (isImage ? "cms-field--image" : "cms-field--text");
@@ -2665,8 +2671,13 @@
       var badge = document.createElement("span");
       badge.className =
         "cms-field-badge " +
-        (isImage ? "cms-field-badge--image" : "cms-field-badge--text");
-      badge.textContent = isImage ? "Image" : "Text";
+        (isImage
+          ? "cms-field-badge--image"
+          : def.kind === "link"
+            ? "cms-field-badge--text"
+            : "cms-field-badge--text");
+      badge.textContent =
+        isImage ? "Image" : def.kind === "link" ? "Link" : "Text";
       head.appendChild(label);
       head.appendChild(badge);
       box.appendChild(head);
@@ -2742,23 +2753,66 @@
       group.className = "cms-group";
       var heading = document.createElement("h4");
       heading.className = "cms-group-heading";
-      heading.textContent = "Page name";
+      heading.textContent = "Page name & link";
       group.appendChild(heading);
       var hint = document.createElement("p");
       hint.className = "hint";
       hint.textContent =
-        "Name shown in this Pages list. Separate from Meta title (SEO) below.";
+        "Page name is shown in this list. Page link is the public URL path.";
       group.appendChild(hint);
       appendField(
         {
           key: "pageName",
           label: "Page name",
           type: "text",
-          hint: path ? "File: " + path : "",
         },
         name || "",
         group
       );
+
+      var slug = String(path || "")
+        .replace(/^\/+/, "")
+        .replace(/\.html$/i, "");
+      if (/\/index$/i.test(slug)) slug = slug.replace(/\/index$/i, "/");
+      var canEditSlug = isDeletableCustomPage(path);
+      var linkBox = document.createElement("div");
+      linkBox.className = "cms-field cms-field--text";
+      var linkHead = document.createElement("div");
+      linkHead.className = "cms-field-head";
+      var linkLabel = document.createElement("label");
+      linkLabel.className = "field-label";
+      linkLabel.setAttribute("for", "cms-field-pageSlug");
+      linkLabel.textContent = "Page link (URL)";
+      var linkBadge = document.createElement("span");
+      linkBadge.className = "cms-field-badge cms-field-badge--text";
+      linkBadge.textContent = canEditSlug ? "Editable" : "Fixed";
+      linkHead.appendChild(linkLabel);
+      linkHead.appendChild(linkBadge);
+      linkBox.appendChild(linkHead);
+      var linkHint = document.createElement("p");
+      linkHint.className = "hint";
+      linkHint.textContent = canEditSlug
+        ? "Change the URL slug (letters, numbers, hyphens). Menus update automatically."
+        : "Built-in pages keep a fixed URL: " + liveUrlForPath(path);
+      linkBox.appendChild(linkHint);
+      var prefix = document.createElement("p");
+      prefix.className = "hint";
+      prefix.textContent = "https://townloc.com/";
+      linkBox.appendChild(prefix);
+      var linkInput = document.createElement("input");
+      linkInput.type = "text";
+      linkInput.id = "cms-field-pageSlug";
+      linkInput.dataset.cmsKey = "pageSlug";
+      linkInput.value = slug === "index" ? "" : slug.replace(/^\/+|\/+$/g, "");
+      linkInput.placeholder = "my-page-url";
+      linkInput.readOnly = !canEditSlug;
+      linkInput.disabled = !canEditSlug;
+      if (canEditSlug) {
+        linkInput.addEventListener("input", markCmsDirty);
+        linkInput.addEventListener("change", markCmsDirty);
+      }
+      linkBox.appendChild(linkInput);
+      group.appendChild(linkBox);
       wrap.appendChild(group);
     }
 
@@ -3255,7 +3309,7 @@
         var showText = filter === "all" || filter === "text";
         var showImages = filter === "all" || filter === "images";
         var visible = cmsState.autoFields.filter(function (f) {
-          if (f.kind === "text") return showText;
+          if (f.kind === "text" || f.kind === "link") return showText;
           if (f.kind === "img") return showImages;
           return false;
         });
@@ -3268,7 +3322,7 @@
           wrap.appendChild(emptyAuto);
         } else {
           var textCount = cmsState.autoFields.filter(function (f) {
-            return f.kind === "text";
+            return f.kind === "text" || f.kind === "link";
           }).length;
           var imageCount = cmsState.autoFields.filter(function (f) {
             return f.kind === "img";
@@ -3276,7 +3330,10 @@
           var meta = document.createElement("p");
           meta.className = "cms-meta";
           meta.textContent =
-            textCount + " text · " + imageCount + " images · grouped by section";
+            textCount +
+            " text/links · " +
+            imageCount +
+            " images · grouped by section";
           wrap.appendChild(meta);
 
           var lastRef = { name: null, el: null };
@@ -3388,33 +3445,51 @@
         var pageNameInput = document.querySelector(
           '#cms-fields [data-cms-key="pageName"]'
         );
+        var pageSlugInput = document.querySelector(
+          '#cms-fields [data-cms-key="pageSlug"]'
+        );
         var nextTitle =
           (pageNameInput && pageNameInput.value.trim()) ||
           cmsState.pageName ||
           page.title ||
           cmsPageNiceName(bpath);
+        var nextSlug =
+          (pageSlugInput && pageSlugInput.value.trim()) ||
+          cmsState.pageSlug ||
+          "";
         var secRes = await Admin.api("PUT", "/api/admin/pages/sections", {
           path: bpath,
           sections: cmsState.builderSections || [],
           title: nextTitle,
           description: page.description || "",
           imageUrl: page.imageUrl || "",
+          pageSlug: nextSlug,
         });
+        var newPath = (secRes && secRes.path) || bpath;
         if (secRes.page) cmsState.builderPage = secRes.page;
+        if (secRes.cms) cmsState.cms = secRes.cms;
         if (!cmsState.cms) cmsState.cms = {};
         if (!cmsState.cms.pageNames) cmsState.cms.pageNames = {};
-        cmsState.cms.pageNames[bpath] = nextTitle;
+        cmsState.cms.pageNames[newPath] = nextTitle;
         cmsState.pageName = nextTitle;
         cmsState.customPages = (cmsState.customPages || []).map(function (p) {
-          return p && p.path === bpath
-            ? Object.assign({}, p, { title: nextTitle })
-            : p;
+          if (!p) return p;
+          if (p.path === bpath || p.path === newPath) {
+            return Object.assign({}, p, { path: newPath, title: nextTitle });
+          }
+          return p;
         });
         if ($("cms-edit-title")) $("cms-edit-title").textContent = nextTitle;
-        toast(
-          "Sections saved. Open View on site (hard refresh) to check.",
-          true
-        );
+        if (newPath !== bpath) {
+          fillCmsPageOptions();
+          await openCmsEditor("auto:" + newPath);
+          toast("Page link updated to /" + newPath.replace(/\.html$/i, ""), true);
+        } else {
+          toast(
+            "Sections saved. Open View on site (hard refresh) to check.",
+            true
+          );
+        }
       } else if (section.indexOf("auto:") === 0) {
         var path = section.slice(5);
         var saveRes = await Admin.api("PUT", "/api/admin/cms", {
@@ -3423,20 +3498,31 @@
           values: cmsState.autoValues,
           seo: cmsState.pageSeo || {},
           pageName: cmsState.pageName || "",
+          pageSlug: cmsState.pageSlug || "",
         });
         if (saveRes.cms) {
           cmsState.cms = saveRes.cms;
           cmsState.customPages = saveRes.cms.customPages || cmsState.customPages;
         }
+        var savedPath = (saveRes && saveRes.path) || path;
         if ($("cms-edit-title")) {
-          $("cms-edit-title").textContent = cmsPageNiceName(path);
+          $("cms-edit-title").textContent = cmsPageNiceName(savedPath);
         }
-        toast(
-          "Page CMS saved for " +
-            path +
-            ". Open “View on site” (hard refresh) to check.",
-          true
-        );
+        if (savedPath !== path) {
+          fillCmsPageOptions();
+          await openCmsEditor("auto:" + savedPath);
+          toast(
+            "Page link updated to /" + savedPath.replace(/\.html$/i, ""),
+            true
+          );
+        } else {
+          toast(
+            "Page CMS saved for " +
+              path +
+              ". Open “View on site” (hard refresh) to check.",
+            true
+          );
+        }
       } else if (section.indexOf("layout:") === 0) {
         var region = section.slice(7);
         var layoutRes = await Admin.api("PUT", "/api/admin/cms", {
