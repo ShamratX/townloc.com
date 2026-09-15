@@ -79,6 +79,8 @@ export const CMS_DEFAULTS = {
   customPages: [],
   /** Editable display names for CMS pages: { "services/foo.html": "Foo" } */
   pageNames: {},
+  /** Old HTML path → new HTML path after CMS URL rename */
+  pageRedirects: {},
   pageSeo: {},
   pageSections: {},
   pages: {

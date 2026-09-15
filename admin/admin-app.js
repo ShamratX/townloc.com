@@ -1039,10 +1039,22 @@
     updateCmsStatusHint();
   }
 
+  function canEditPageSlug(path) {
+    var fixed = {
+      "index.html": true,
+      "privacy.html": true,
+      "terms.html": true,
+      "industries/index.html": true,
+      "blog/index.html": true,
+      "services/index.html": true,
+    };
+    return !!(path && !fixed[path]);
+  }
+
   function isDeletableCustomPage(path) {
     if (!path || !/\.html$/i.test(path)) return false;
     return (cmsState.customPages || []).some(function (p) {
-      return p && p.path === path;
+      return p && p.path === path && !p.builtinSource;
     });
   }
 
@@ -2774,7 +2786,7 @@
         .replace(/^\/+/, "")
         .replace(/\.html$/i, "");
       if (/\/index$/i.test(slug)) slug = slug.replace(/\/index$/i, "/");
-      var canEditSlug = isDeletableCustomPage(path);
+      var canEditSlug = canEditPageSlug(path);
       var linkBox = document.createElement("div");
       linkBox.className = "cms-field cms-field--text";
       var linkHead = document.createElement("div");
@@ -2792,8 +2804,8 @@
       var linkHint = document.createElement("p");
       linkHint.className = "hint";
       linkHint.textContent = canEditSlug
-        ? "Change the URL slug (letters, numbers, hyphens). Menus update automatically."
-        : "Built-in pages keep a fixed URL: " + liveUrlForPath(path);
+        ? "Change this URL path (example: services/my-page). Old URL redirects automatically. Menus update on save."
+        : "This structural page keeps a fixed URL: " + liveUrlForPath(path);
       linkBox.appendChild(linkHint);
       var prefix = document.createElement("p");
       prefix.className = "hint";
@@ -2804,7 +2816,7 @@
       linkInput.id = "cms-field-pageSlug";
       linkInput.dataset.cmsKey = "pageSlug";
       linkInput.value = slug === "index" ? "" : slug.replace(/^\/+|\/+$/g, "");
-      linkInput.placeholder = "my-page-url";
+      linkInput.placeholder = "services/my-page";
       linkInput.readOnly = !canEditSlug;
       linkInput.disabled = !canEditSlug;
       if (canEditSlug) {

@@ -75,6 +75,16 @@ const PAGE_ALLOWLIST = [
 
 const PAGE_ALLOWLIST_SET = new Set(PAGE_ALLOWLIST);
 
+/** Structural pages whose public URL must stay fixed. */
+const FIXED_PAGE_PATHS = new Set([
+  "index.html",
+  "privacy.html",
+  "terms.html",
+  "industries/index.html",
+  "blog/index.html",
+  "services/index.html",
+]);
+
 /** Slugs that must not become root CMS pages (collide with site routes/files). */
 const RESERVED_ROOT_SLUGS = new Set([
   "admin",
@@ -141,73 +151,133 @@ function publicHrefForPath(path) {
   return `/${p.replace(/\.html$/i, "")}`;
 }
 
+function pageRedirectsFromDoc(doc) {
+  return doc && doc.pageRedirects && typeof doc.pageRedirects === "object"
+    ? doc.pageRedirects
+    : {};
+}
+
+function resolveRedirectPath(doc, path) {
+  const redirects = pageRedirectsFromDoc(doc);
+  let p = String(path || "").replace(/^\/+/, "");
+  const seen = new Set();
+  while (redirects[p] && !seen.has(p)) {
+    seen.add(p);
+    p = String(redirects[p]).replace(/^\/+/, "");
+  }
+  return p;
+}
+
+function canRenamePageUrl(path, doc) {
+  const p = String(path || "").replace(/^\/+/, "");
+  if (!p || !/\.html$/i.test(p) || FIXED_PAGE_PATHS.has(p)) return false;
+  if (isManagedCustomPage(p, doc)) return true;
+  if (PAGE_ALLOWLIST_SET.has(p)) return true;
+  // Already renamed off a built-in / custom page
+  if (customPagesFromDoc(doc).some((x) => x && x.path === p)) return true;
+  const redirects = pageRedirectsFromDoc(doc);
+  return Object.values(redirects).some((v) => String(v) === p);
+}
+
+function pathFromPageSlugInput(raw) {
+  let s = String(raw || "")
+    .trim()
+    .replace(/^https?:\/\/[^/]+/i, "")
+    .replace(/^\/+/, "")
+    .replace(/\.html$/i, "");
+  if (!s) return "";
+  const parts = s
+    .split("/")
+    .map((part) => slugifyTitle(part))
+    .filter(Boolean);
+  if (!parts.length) return "";
+  for (const part of parts) {
+    if (RESERVED_ROOT_SLUGS.has(part) && parts.length === 1) return "";
+  }
+  return `${parts.join("/")}.html`;
+}
+
 /**
- * Rename a managed custom page path (slug.html → new-slug.html).
- * Moves D1 HTML + CMS maps + menu hrefs.
+ * Rename a page URL (custom or built-in service page).
+ * Copies HTML into D1 at the new path, updates CMS maps/menus, redirects old URL.
  */
-async function renameCustomPagePath(env, doc, oldPath, nextSlugRaw) {
+async function renamePagePath(env, doc, oldPath, nextSlugRaw) {
   const from = String(oldPath || "").replace(/^\/+/, "");
-  if (!isManagedCustomPage(from, doc)) {
-    return { ok: false, message: "Only custom pages can change their URL." };
-  }
-  let slug = slugifyTitle(String(nextSlugRaw || "").trim());
-  if (!slug) {
-    return { ok: false, message: "Enter a page link (URL slug)." };
-  }
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+  if (!canRenamePageUrl(from, doc)) {
     return {
       ok: false,
-      message: "Use a simple URL (letters, numbers, hyphens).",
+      message: "This page URL is fixed and cannot be changed.",
     };
   }
-  if (RESERVED_ROOT_SLUGS.has(slug)) {
+  const to = pathFromPageSlugInput(nextSlugRaw);
+  if (!to) {
     return {
       ok: false,
-      message: "That URL is reserved. Choose a different link.",
+      message: "Enter a page link (e.g. services/my-page or my-page).",
     };
   }
-  const to = `${slug}.html`;
+  if (FIXED_PAGE_PATHS.has(to)) {
+    return { ok: false, message: "That URL is reserved." };
+  }
   if (to === from) return { ok: true, doc, path: from, changed: false };
-  if (isEditablePage(to, doc) || isEditablePage(`services/${to}`, doc)) {
-    return {
-      ok: false,
-      message: "A page with this link already exists.",
-    };
+
+  const currentTo = resolveRedirectPath(doc, to);
+  if (
+    (currentTo !== from && isEditablePage(to, doc)) ||
+    isEditablePage(`services/${to}`, doc)
+  ) {
+    return { ok: false, message: "A page with this link already exists." };
   }
   const existing = await env.DB.prepare(`SELECT path FROM pages WHERE path = ?`)
     .bind(to)
     .first();
-  if (existing) {
-    return {
-      ok: false,
-      message: "A page with this link already exists.",
-    };
+  if (existing && to !== from) {
+    return { ok: false, message: "A page with this link already exists." };
   }
 
-  const row = await env.DB.prepare(`SELECT html FROM pages WHERE path = ?`)
-    .bind(from)
-    .first();
-  let html = row && typeof row.html === "string" ? row.html : "";
-  if (html) {
-    const oldHref = publicHrefForPath(from);
-    const newHref = publicHrefForPath(to);
-    const oldSlug = from.replace(/\.html$/i, "");
-    html = html
-      .replace(
-        new RegExp(`https://townloc\\.com${oldHref.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:\\.html)?`, "gi"),
-        `https://townloc.com${newHref}`
-      )
-      .replace(
-        new RegExp(`data-cms-page="${oldSlug.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`, "gi"),
-        `data-cms-page="${slug}"`
-      );
-    await env.DB.prepare(
-      `INSERT INTO pages (path, html, updated_at) VALUES (?, ?, datetime('now'))
-       ON CONFLICT(path) DO UPDATE SET html = excluded.html, updated_at = datetime('now')`
+  let html = await readPageHtml(env, from);
+  if (!html) {
+    return { ok: false, message: "Could not read this page to move the URL." };
+  }
+  const oldHref = publicHrefForPath(from);
+  const newHref = publicHrefForPath(to);
+  const oldSlug = from.replace(/\.html$/i, "");
+  const newSlug = to.replace(/\.html$/i, "");
+  html = html
+    .replace(
+      new RegExp(
+        `https://townloc\\.com${oldHref.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:\\.html)?`,
+        "gi"
+      ),
+      `https://townloc.com${newHref}`
     )
-      .bind(to, html)
-      .run();
+    .replace(
+      new RegExp(
+        `data-cms-page="${oldSlug.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`,
+        "gi"
+      ),
+      `data-cms-page="${newSlug}"`
+    )
+    .replace(
+      new RegExp(
+        `(href=["'])${oldHref.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(\\.html)?(["'])`,
+        "gi"
+      ),
+      `$1${newHref}$3`
+    );
+
+  await env.DB.prepare(
+    `INSERT INTO pages (path, html, updated_at) VALUES (?, ?, datetime('now'))
+     ON CONFLICT(path) DO UPDATE SET html = excluded.html, updated_at = datetime('now')`
+  )
+    .bind(to, html)
+    .run();
+
+  // Keep a D1 stub redirect marker only via CMS redirects; remove old D1 copy if any.
+  try {
     await env.DB.prepare(`DELETE FROM pages WHERE path = ?`).bind(from).run();
+  } catch {
+    /* ignore */
   }
 
   const pageSections = {
@@ -222,6 +292,8 @@ async function renameCustomPagePath(env, doc, oldPath, nextSlugRaw) {
   const autoPages = {
     ...(doc.autoPages && typeof doc.autoPages === "object" ? doc.autoPages : {}),
   };
+  const pageRedirects = { ...pageRedirectsFromDoc(doc) };
+
   if (pageSections[from]) {
     pageSections[to] = pageSections[from];
     delete pageSections[from];
@@ -239,9 +311,31 @@ async function renameCustomPagePath(env, doc, oldPath, nextSlugRaw) {
     delete autoPages[from];
   }
 
-  const customPages = customPagesFromDoc(doc).map((entry) =>
+  // Point previous redirects at the newest path.
+  Object.keys(pageRedirects).forEach((key) => {
+    if (pageRedirects[key] === from) pageRedirects[key] = to;
+  });
+  pageRedirects[from] = to;
+  delete pageRedirects[to];
+
+  let customPages = customPagesFromDoc(doc).map((entry) =>
     entry && entry.path === from ? { ...entry, path: to } : entry
   );
+  if (
+    PAGE_ALLOWLIST_SET.has(from) &&
+    !customPages.some((x) => x && x.path === to)
+  ) {
+    customPages = [
+      ...customPages,
+      {
+        path: to,
+        title: resolvePageName(doc, from, newSlug),
+        builtinSource: from,
+        created_at: new Date().toISOString(),
+      },
+    ];
+  }
+
   const menus = rewriteMenuHrefsForMovedPage(
     customMenusFromDoc(doc),
     from,
@@ -255,6 +349,7 @@ async function renameCustomPagePath(env, doc, oldPath, nextSlugRaw) {
     pageSeo,
     pageNames,
     autoPages,
+    pageRedirects,
     customMenus: menus,
   });
   merged.customPages = customPages;
@@ -262,9 +357,15 @@ async function renameCustomPagePath(env, doc, oldPath, nextSlugRaw) {
   merged.pageSeo = pageSeo;
   merged.pageNames = pageNames;
   merged.autoPages = autoPages;
+  merged.pageRedirects = pageRedirects;
   merged.customMenus = menus;
   if (doc.layout) merged.layout = doc.layout;
   return { ok: true, doc: merged, path: to, changed: true };
+}
+
+/** @deprecated use renamePagePath */
+async function renameCustomPagePath(env, doc, oldPath, nextSlugRaw) {
+  return renamePagePath(env, doc, oldPath, nextSlugRaw);
 }
 
 function isManagedCustomPage(path, doc) {
@@ -493,7 +594,8 @@ function newMenuGroupId() {
 }
 
 function editablePagePaths(doc) {
-  const paths = [...PAGE_ALLOWLIST];
+  const redirects = pageRedirectsFromDoc(doc);
+  const paths = PAGE_ALLOWLIST.map((p) => resolveRedirectPath(doc, p));
   const seen = new Set(paths);
   for (const page of customPagesFromDoc(doc)) {
     const p = page && page.path ? String(page.path).replace(/^\/+/, "") : "";
@@ -502,13 +604,25 @@ function editablePagePaths(doc) {
       paths.push(p);
     }
   }
+  // Keep redirect targets even if not yet in customPages
+  Object.values(redirects).forEach((to) => {
+    const p = String(to || "").replace(/^\/+/, "");
+    if (p && !seen.has(p)) {
+      seen.add(p);
+      paths.push(p);
+    }
+  });
   return paths;
 }
 
 function isEditablePage(path, doc) {
   const p = String(path || "").replace(/^\/+/, "");
   if (PAGE_ALLOWLIST_SET.has(p)) return true;
-  return customPagesFromDoc(doc).some((x) => x && x.path === p);
+  if (customPagesFromDoc(doc).some((x) => x && x.path === p)) return true;
+  const redirects = pageRedirectsFromDoc(doc);
+  if (Object.values(redirects).some((v) => String(v) === p)) return true;
+  // Old path still "editable" only via redirect resolve for CMS open — prefer new path
+  return false;
 }
 
 async function writeCmsDocument(env, data) {
@@ -1919,7 +2033,7 @@ async function handleAdminPageSectionsPut(request, env, origin) {
     Object.prototype.hasOwnProperty.call(body, "pageSlug") ||
     Object.prototype.hasOwnProperty.call(body, "slug")
   ) {
-    const renamed = await renameCustomPagePath(
+    const renamed = await renamePagePath(
       env,
       workDoc,
       workPath,
@@ -2693,8 +2807,8 @@ async function handleAdminCmsPut(request, env, origin) {
     const wantsSlug =
       Object.prototype.hasOwnProperty.call(body, "pageSlug") ||
       Object.prototype.hasOwnProperty.call(body, "slug");
-    if (wantsSlug && isManagedCustomPage(path, working)) {
-      const renamed = await renameCustomPagePath(
+    if (wantsSlug && canRenamePageUrl(path, working)) {
+      const renamed = await renamePagePath(
         env,
         working,
         path,
@@ -2779,6 +2893,8 @@ async function handleAdminCmsPut(request, env, origin) {
   else merged.customPages = customPagesFromDoc(current);
   if (incoming.pageNames) merged.pageNames = incoming.pageNames;
   else if (current.pageNames) merged.pageNames = current.pageNames;
+  if (incoming.pageRedirects) merged.pageRedirects = incoming.pageRedirects;
+  else if (current.pageRedirects) merged.pageRedirects = current.pageRedirects;
   if (incoming.customMenus) merged.customMenus = incoming.customMenus;
   else merged.customMenus = customMenusFromDoc(current);
   await writeCmsDocument(env, merged);
@@ -3154,6 +3270,18 @@ async function serveAssetWithCms(request, env) {
   });
 
   if (looksHtml && env.DB) {
+    // CMS-renamed page URLs: old path → new path
+    try {
+      const doc = await readCmsDocument(env);
+      const redirected = resolveRedirectPath(doc, pagePath);
+      if (redirected && redirected !== pagePath) {
+        const dest = publicHrefForPath(redirected);
+        return Response.redirect(new URL(dest + url.search, url).toString(), 301);
+      }
+    } catch (err) {
+      console.error("page redirect check failed", err);
+    }
+
     // Old custom URLs under /services/{slug} → /{slug}
     const legacySvc =
       url.pathname.match(/^\/services\/([a-z0-9]+(?:-[a-z0-9]+)*)\.html$/i) ||
