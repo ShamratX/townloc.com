@@ -84,61 +84,12 @@
       animation: nf-pulse 8s ease-in-out infinite;
     }
 
-    .nf-header {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 1.25rem 1.25rem 0;
-    }
-
-    @media (min-width: 1024px) {
-      .nf-header { padding-left: 2rem; padding-right: 2rem; }
-    }
-
-    .nf-logo {
-      display: inline-flex;
-      align-items: center;
-      line-height: 0;
-    }
-
-    .nf-logo img {
-      display: block;
-      height: 40px;
-      width: auto;
-    }
-
-    .nf-top-cta {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 2.5rem;
-      padding: 0 1.15rem;
-      border-radius: 999px;
-      border: 1px solid var(--nf-line);
-      color: var(--nf-ink);
-      text-decoration: none;
-      font-size: 0.875rem;
-      font-weight: 600;
-      background: #ffffff;
-      transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-    }
-
-    .nf-top-cta:hover {
-      background: #f7f7f7;
-      border-color: rgba(17, 17, 17, 0.22);
-      transform: translateY(-1px);
-    }
-
     .nf-main {
       position: relative;
       z-index: 2;
       display: grid;
       align-items: center;
-      min-height: calc(100vh - 5rem);
+      min-height: 100vh;
       max-width: 1120px;
       margin: 0 auto;
       padding: 3.5rem 1.25rem 4rem;
@@ -359,14 +310,6 @@
     <div class="nf-grid" aria-hidden="true"></div>
     <div class="nf-glow" aria-hidden="true"></div>
 
-    <header class="nf-header">
-      <a href="/" class="nf-logo" aria-label="Townloc home">
-        <img src="/assets/images/townloc-logo.png?v=6" alt="Townloc" width="151" height="45" decoding="sync"
-          fetchpriority="high" />
-      </a>
-      <a class="nf-top-cta" href="/#contact">Get Started</a>
-    </header>
-
     <main class="nf-main" id="main">
       <section>
         <p class="nf-kicker">Error 404</p>
@@ -381,7 +324,6 @@
         <div class="nf-meta">
           <span>Need help?</span>
           <a href="/#contact">Contact Townloc</a>
-          <a href="/blog/">Blog</a>
         </div>
       </section>
 
