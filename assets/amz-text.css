@@ -1,0 +1,551 @@
+/* Self-hosted Open Sans (no Google Fonts round-trip) */
+@font-face {
+  font-family: "Open Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("/assets/fonts/opensans-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Open Sans Fallback";
+  font-style: normal;
+  font-weight: 400;
+  src: local("Arial"), local("Helvetica Neue"), local("Helvetica");
+  ascent-override: 101%;
+  descent-override: 27%;
+  line-gap-override: 0%;
+  size-adjust: 105%;
+}
+
+/* amzgetway soft text — load AFTER Tailwind + site.css */
+:root {
+  --amz-heading: #121212;
+  --amz-body: #3a3a3a;
+  --amz-muted: #7A7A7A;
+  --amz-strong: #333333;
+  --amz-secondary: #54595F;
+}
+
+body {
+  background-color: #ffffff;
+  color: var(--amz-body) !important;
+  font-family: "Open Sans", "Open Sans Fallback", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.75;
+  word-wrap: break-word;
+}
+
+/* Tailwind ink utilities were still #111 — remap to soft grays */
+.text-ink { color: var(--amz-heading) !important; }
+.text-ink\/25 { color: #9a9a9a !important; }
+.text-ink\/30 { color: #8e8e8e !important; }
+.text-ink\/35 { color: #858585 !important; }
+.text-ink\/40,
+.text-ink\/45 { color: var(--amz-body) !important; }
+.text-ink\/50 { color: #6e6e6e !important; }
+.text-ink\/55,
+.text-ink\/60 { color: var(--amz-body) !important; }
+.text-ink\/65 { color: var(--amz-secondary) !important; }
+.text-ink\/70,
+.text-ink\/75,
+.text-ink\/80 { color: var(--amz-strong) !important; }
+.text-ink\/90 { color: var(--amz-heading) !important; }
+
+.text-muted { color: var(--amz-muted) !important; }
+.text-black\/45 { color: var(--amz-muted) !important; }
+.text-black\/55 { color: var(--amz-body) !important; }
+.text-black\/60 { color: var(--amz-secondary) !important; }
+
+main h1, main h2, main h3, main h4, main h5, main h6,
+.font-serif,
+.section-heading,
+.svc-hero-title,
+.svc-section-title,
+.work-row-title,
+.work-compact-heading,
+.trust-compact-heading {
+  color: var(--amz-heading) !important;
+}
+
+main p,
+main li,
+main .body-lg,
+main .svc-lead {
+  color: var(--amz-body);
+}
+main p.text-muted,
+main .text-muted,
+main p.leading-relaxed {
+  color: #3a3a3a !important;
+}
+
+#trust-strip .trust-badge p.text-sm { color: var(--amz-heading) !important; }
+#trust-strip .trust-badge p.text-xs { color: var(--amz-body) !important; }
+
+main .text-xs.uppercase,
+main p.text-xs.font-medium.uppercase {
+  color: var(--amz-secondary) !important;
+}
+
+#contract-form label > span.font-medium,
+#contact label > span.font-medium,
+#contract-form label > span:not(.text-xs),
+#contact label > span:not(.text-xs) {
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+  color: #333333 !important;
+}
+
+/* Contact form field text color — keep as-is (do not follow body remaps) */
+#contact .field-input,
+#contact input,
+#contact select,
+#contact textarea,
+#contract-form .field-input,
+#contract-form input,
+#contract-form select,
+#contract-form textarea {
+  color: #333333 !important;
+}
+
+/* Dark hero — keep light text */
+.hero-banner .hero-title { color: #F5F1E8 !important; }
+.hero-banner .hero-lead { color: #ffffff !important; }
+.hero-banner .hero-eyebrow {
+  color: #ffffff !important;
+  font-family: Rajdhani, "Rajdhani Fallback", system-ui, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+}
+
+/* Footer light-on-dark */
+.site-footer,
+.site-footer a,
+.footer-col a,
+.footer-col-title,
+.footer-guarantee-label,
+.footer-guarantee-text,
+.footer-tagline,
+.footer-ownership li {
+  color: #ffffff !important;
+}
+
+/* =========================================================
+   Menu + Services dropdown — Townloc (no orange hover)
+   ========================================================= */
+:root {
+  --amz-menu: #000000;
+  --amz-menu-hover: #111111;
+}
+
+/* Services dropdown — match dark navbar (font-size untouched) */
+.nav-drop-item,
+#site-header .nav-drop-item {
+  color: #ffffff !important;
+  font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
+}
+
+.nav-drop-name,
+#site-header .nav-drop-name {
+  color: #ffffff !important;
+  font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.02em !important;
+}
+
+.nav-drop-item:hover,
+.nav-drop-item:focus-visible,
+#site-header .nav-drop-menu .nav-drop-item:hover,
+#site-header .nav-drop-menu .nav-drop-item:focus-visible {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+.nav-drop-item:hover .nav-drop-name,
+.nav-drop-item:focus-visible .nav-drop-name,
+#site-header .nav-drop-menu .nav-drop-item:hover .nav-drop-name,
+#site-header .nav-drop-menu .nav-drop-item:focus-visible .nav-drop-name {
+  color: #ffffff !important;
+}
+
+/* Mobile services panel — black like menu, white text */
+#mobile-menu .mobile-services .nav-drop-panel {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+#mobile-menu .nav-drop-item,
+#mobile-menu .nav-drop-name {
+  color: #ffffff !important;
+  font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.02em !important;
+}
+#mobile-menu .nav-drop-item:hover,
+#mobile-menu .nav-drop-item:focus-visible {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+#mobile-menu .nav-drop-item:hover .nav-drop-name,
+#mobile-menu .nav-drop-item:focus-visible .nav-drop-name {
+  color: #ffffff !important;
+}
+
+.nav-drop-item:hover .nav-drop-arrow,
+.nav-drop-item:focus-visible .nav-drop-arrow,
+#site-header .nav-drop-menu .nav-drop-item:hover .nav-drop-arrow,
+#site-header .nav-drop-menu .nav-drop-item:focus-visible .nav-drop-arrow {
+  color: rgba(17, 17, 17, 0.55) !important;
+  opacity: 1 !important;
+}
+
+/* Top nav labels — Rajdhani 600 like amzgetway (keep white on dark header) */
+#site-header .nav-link,
+#site-header .nav-drop-btn,
+#site-header .nav-drop-btn span {
+  font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+}
+
+/* =========================================================
+   Headlines + Footer — match amzgetway.com
+   ========================================================= */
+
+/* Headlines (light sections) */
+main h1, main h2, main h3, main h4,
+.font-serif,
+.section-heading,
+.svc-section-title,
+.svc-hero-title,
+.work-row-title,
+.work-compact-heading,
+.trust-compact-heading {
+  font-family: "Josefin Sans", "Josefin Fallback", sans-serif !important;
+  font-weight: 500 !important;
+  font-style: normal !important;
+  color: #121212 !important;
+  line-height: 1.3 !important;
+  letter-spacing: normal !important;
+}
+main h5, main h6 {
+  font-family: "Josefin Sans", "Josefin Fallback", sans-serif !important;
+  font-weight: 500 !important;
+  color: #121212 !important;
+  line-height: 1.3 !important;
+}
+
+/* Hero stays light on dark — ~2-line title size */
+.hero-banner .hero-title {
+  color: #F5F1E8 !important;
+  font-family: "Josefin Sans", "Josefin Fallback", sans-serif !important;
+  font-weight: 700 !important;
+  font-size: clamp(1.85rem, 4.1vw, 2.65rem) !important;
+  max-width: 17.4em;
+  line-height: 1.14 !important;
+}
+.hero-banner .hero-lead {
+  color: #ffffff !important;
+}
+
+/* Footer — amzgetway navy + soft text */
+.site-footer {
+  background: #313743 !important;
+  color: #ffffff !important;
+}
+.footer-bottom,
+.site-footer .footer-bottom {
+  background: #363636 !important;
+}
+.footer-logo,
+.footer-mark,
+.footer-col-title,
+.footer-guarantee-label,
+.footer-guarantee-text,
+.footer-guarantee-text span,
+.footer-tagline,
+.footer-ownership li {
+  color: #ffffff !important;
+}
+.footer-logo {
+  font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
+  font-weight: 500 !important;
+}
+.footer-col-title,
+.footer-guarantee-label {
+  font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}
+.footer-col a,
+.footer-contact a.footer-contact-link,
+.site-footer a:not(.btn-primary):not(.btn-secondary) {
+  color: #ffffff !important;
+  font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
+}
+.footer-col a:hover,
+.footer-col a[aria-current="page"],
+.footer-contact a.footer-contact-link:hover,
+.site-footer a:hover:not(.btn-primary):not(.btn-secondary) {
+  color: #FFFFFF !important;
+}
+.footer-tagline,
+.footer-ownership li,
+.footer-guarantee-text {
+  font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
+  color: #ffffff !important;
+}
+
+/* Get Started — bold like menu (Rajdhani 600) */
+#site-header .header-cta {
+  font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+}
+
+/* Services dropdown — auto width like amzgetway (longest label wins) */
+#site-header .nav-drop-menu {
+  left: 0 !important;
+  right: auto !important;
+  width: max-content !important;
+  max-width: min(100vw - 2rem, 28rem) !important;
+}
+#site-header .nav-drop-menu .nav-drop-panel {
+  width: max-content !important;
+  max-width: 100% !important;
+  border-radius: 1.15rem !important;
+  background: #1c1c1c !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45),
+    0 12px 28px -14px rgba(0, 0, 0, 0.65) !important;
+}
+#site-header .nav-drop-menu .nav-drop-item,
+#site-header .nav-drop-menu .nav-drop-name {
+  white-space: nowrap !important;
+}
+
+/* Mobile services list — full-width hover row */
+#mobile-menu .mobile-services .nav-drop-panel {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+#mobile-menu .mobile-services .nav-drop-item {
+  display: flex !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  white-space: normal !important;
+}
+#mobile-menu .mobile-services .nav-drop-name {
+  flex: 1 1 auto !important;
+  white-space: normal !important;
+}
+#mobile-menu .mobile-services .nav-drop-item + .nav-drop-item {
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Dropdown labels — regular (400), not semibold */
+#site-header .nav-drop-item,
+#site-header .nav-drop-name,
+#mobile-menu .nav-drop-item,
+#mobile-menu .nav-drop-name {
+  font-weight: 400 !important;
+}
+
+/* Footer — Rajdhani + white (no universal * so logo/icons stay sane) */
+.site-footer,
+.site-footer a,
+.site-footer p,
+.site-footer li,
+.site-footer span:not(.footer-contact-emoji),
+.footer-logo,
+.footer-col-title,
+.footer-col a,
+.footer-tagline,
+.footer-guarantee-label,
+.footer-guarantee-text,
+.footer-ownership li,
+.footer-contact a,
+.footer-bottom,
+.footer-email,
+.footer-cta {
+  font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
+  color: #ffffff !important;
+}
+.site-footer .footer-bottom,
+.footer-bottom {
+  background: #363636 !important;
+}
+.site-footer .footer-col-title {
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}
+.site-footer .footer-col a,
+.footer-col a {
+  font-size: 1rem !important;
+  font-weight: 400 !important;
+}
+.site-footer .footer-guarantee-label {
+  font-weight: 500 !important;
+}
+.site-footer .footer-guarantee-text,
+.site-footer .footer-tagline,
+.site-footer .footer-ownership li {
+  font-weight: 400 !important;
+}
+.site-footer a:hover,
+.footer-col a:hover,
+.footer-col a[aria-current="page"],
+.footer-contact a.footer-contact-link:hover {
+  color: #ffffff !important;
+}
+
+/* Services dropdown — 1rem; hero lead — 15px */
+#site-header .nav-drop-name,
+.nav-drop-name,
+#mobile-menu .nav-drop-name {
+  font-size: 1rem !important;
+}
+.hero-banner .hero-lead,
+.hero-lead {
+  font-size: 15px !important;
+}
+
+/* Footer CTA — full label, no ellipsis */
+.site-footer .footer-cta,
+.footer-bottom .footer-cta {
+  white-space: nowrap !important;
+  overflow: visible !important;
+  max-width: none !important;
+  flex-shrink: 0 !important;
+}
+
+/* Non-hero section headlines — smaller (banner untouched) */
+.section-heading,
+.svc-section-title,
+.work-compact-heading,
+.trust-compact-heading,
+main section:not(.hero-banner) > .mx-auto h2.font-serif,
+main section:not(.hero-banner) h2.font-serif,
+main section:not(.hero-banner) h2.section-heading {
+  font-size: 2rem !important;
+  line-height: 1.15 !important;
+}
+
+/* footer-tagline — 15px */
+.site-footer .footer-tagline,
+.footer-tagline {
+  font-size: 15px !important;
+}
+
+
+
+/* Footer subscribe */
+.footer-subscribe-label,
+.site-footer .footer-subscribe-label {
+  display: none !important;
+}
+.footer-subscribe-msg {
+  font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
+  color: #ffffff !important;
+}
+.footer-subscribe-btn {
+  font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
+  font-weight: 500 !important;
+  color: #111111 !important;
+  background: #ffffff !important;
+  white-space: nowrap !important;
+}
+.footer-subscribe-input {
+  font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
+  color: #ffffff !important;
+}
+.footer-subscribe-row {
+  display: flex !important;
+  align-items: stretch !important;
+  gap: 0.45rem !important;
+  position: relative !important;
+}
+.footer-subscribe-hp,
+.site-footer .footer-subscribe-hp {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Trust section body copy */
+.trust-compact-lead,
+.trust-compact-note,
+.trust-principle > p:not(.trust-principle-num) {
+  font-family: "Open Sans", "Open Sans Fallback", system-ui, sans-serif !important;
+  font-weight: 400 !important;
+  color: var(--amz-body) !important;
+}
+
+/* Navbar — black bar + dark pill (colors only; fonts untouched) */
+#site-header {
+  background: linear-gradient(90deg, #141414 0%, #0a0a0a 50%, #050505 100%) !important;
+  border-color: transparent !important;
+}
+#site-header .header-cta {
+  background: #1c1c1c !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4) !important;
+}
+#site-header .nav-pill .nav-link,
+#site-header .nav-pill .nav-drop-btn,
+#site-header .header-cta {
+  color: #ffffff !important;
+}
+
+/* FAQ questions — section-headline font family only */ (size/weight/color untouched)
+.faq-accordion details summary {
+  font-family: "Josefin Sans", "Josefin Fallback", sans-serif !important;
+}
+
+/* h2 only — font-weight 600 (banner untouched; beat .font-serif/.section-heading) */
+main h2,
+main h2.font-serif,
+main h2.section-heading,
+main h2.work-compact-heading,
+main h2.trust-compact-heading,
+main h2.svc-section-title,
+h2.font-serif,
+h2.section-heading,
+h2.work-compact-heading,
+h2.trust-compact-heading,
+h2.svc-section-title {
+  font-weight: 600 !important;
+}
+

@@ -25,13 +25,14 @@
     href="/assets/images/townloc-favicon.png?v=4" />
   <link rel="apple-touch-icon" href="/assets/images/townloc-favicon.png?v=4" />
   <script type="application/ld+json" id="post-jsonld"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="../assets/tailwind.js"></script>
-  <script>document.documentElement.classList.add("js");</script>
-  <link rel="stylesheet" href="../assets/site.css?v=65" />
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/rajdhani-600-latin.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/rajdhani-400-latin.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/josefin-700-latin.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/josefin-400-latin.woff2" crossorigin />
+<script>document.documentElement.classList.add("js");</script>
+  <link rel="stylesheet" href="../assets/site.css?v=136" />
+  <link rel="stylesheet" href="../assets/tailwind.min.css?v=1" />
+  <link rel="stylesheet" href="../assets/amz-text.css?v=64" />
 </head>
 
 <body class="bg-paper text-ink antialiased">
@@ -44,7 +45,7 @@
       <a href="../index.html" class="site-logo-link flex items-center" aria-label="Townloc home">
         <img class="site-logo site-logo-header" src="../assets/images/townloc-logo.png?v=6" alt="Townloc" width="151" height="45" decoding="sync" fetchpriority="high" />
       </a>
-      <ul class="hidden items-center gap-8 text-sm md:flex">
+      <ul class="nav-pill hidden items-center gap-8 text-sm lg:flex">
         <li class="nav-drop relative">
           <button type="button" class="nav-drop-btn nav-link inline-flex items-center gap-1 opacity-85"
             aria-expanded="false" aria-haspopup="true">
@@ -54,8 +55,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
             </svg>
           </button>
-          <div class="nav-drop-menu absolute left-1/2 top-full z-50 w-[min(22rem,calc(100vw-2rem))] pt-3">
-            <div class="nav-drop-panel rounded-[1.35rem] p-1.5">
+          <div class="nav-drop-menu absolute left-0 top-full z-50 pt-3">
+            <div class="nav-drop-panel">
               <a class="nav-drop-item" href="../services/google-business-profile-setup.html"><span
                   class="nav-drop-num">01</span><span class="nav-drop-name">Google Business Profile</span><span
                   class="nav-drop-arrow">→</span></a>
@@ -82,10 +83,10 @@
       </ul>
       <div class="flex items-center gap-3">
         <a href="../index.html#contact"
-          class="header-cta hidden rounded-full bg-white text-ink px-4 py-2 text-sm font-medium md:inline-flex">Get
+          class="header-cta hidden rounded-full bg-white text-ink px-4 py-2 text-sm font-semibold lg:inline-flex">Get
           Started</a>
         <button id="menu-btn"
-          class="grid h-10 w-10 place-items-center rounded-full border border-white/20 md:hidden"
+          class="grid h-10 w-10 place-items-center rounded-full border border-white/20 lg:hidden"
           aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
           <svg id="icon-open" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
             <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16" />
@@ -97,7 +98,7 @@
         </button>
       </div>
     </nav>
-    <div id="mobile-menu" class="mobile-menu md:hidden" aria-hidden="true">
+    <div id="mobile-menu" class="mobile-menu lg:hidden" aria-hidden="true">
       <div class="mobile-menu-inner">
         <div class="mobile-menu-nav">
           <a href="../index.html#industries" class="mobile-link mobile-menu-item">Industries</a>
@@ -139,7 +140,7 @@
         <a href="../index.html#contact" class="footer-cta">Get a Free Assessment</a>
       </div>
   </footer>
-  <script src="../assets/site.js?v=17"></script>
+  <script src="../assets/site.js?v=28"></script>
   <script src="../assets/cms.js"></script>
   <script>
     (function () {

@@ -56,6 +56,7 @@ const ALLOWED_SERVICES = new Set([
   "Local SEO",
   "Remove Negative Reviews",
   "Not sure",
+  "Newsletter Subscribe",
 ]);
 
 const PAGE_ALLOWLIST = [
@@ -945,6 +946,102 @@ function isValidEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && value.length <= MAX.email;
 }
 
+const BLOCKED_EMAIL_DOMAINS = new Set([
+  "mailinator.com",
+  "guerrillamail.com",
+  "guerrillamail.net",
+  "sharklasers.com",
+  "grr.la",
+  "guerrillamailblock.com",
+  "pokemail.net",
+  "spam4.me",
+  "yopmail.com",
+  "yopmail.fr",
+  "tempmail.com",
+  "temp-mail.org",
+  "temp-mail.io",
+  "throwawaymail.com",
+  "trashmail.com",
+  "10minutemail.com",
+  "10minutemail.net",
+  "minutemail.com",
+  "maildrop.cc",
+  "discard.email",
+  "mailnesia.com",
+  "fakeinbox.com",
+  "getnada.com",
+  "emailondeck.com",
+  "moakt.com",
+  "mohmal.com",
+  "tmpmail.org",
+  "tmpmail.net",
+  "mailcatch.com",
+  "mailnull.com",
+  "spamgourmet.com",
+  "mailinator.net",
+  "mailinator.org",
+  "example.com",
+  "example.org",
+  "example.net",
+  "test.com",
+  "test.net",
+  "asdf.com",
+  "qwerty.com",
+  "localhost",
+  "invalid.com",
+]);
+
+const BLOCKED_EMAIL_LOCALS = new Set([
+  "test",
+  "testing",
+  "fake",
+  "asdf",
+  "asdfasdf",
+  "qwerty",
+  "none",
+  "na",
+  "n/a",
+  "abc",
+  "aaa",
+  "xxx",
+  "noreply",
+  "no-reply",
+]);
+
+function isFakeEmail(value) {
+  const email = String(value || "")
+    .trim()
+    .toLowerCase();
+  if (!isValidEmail(email)) return true;
+
+  const at = email.lastIndexOf("@");
+  const local = email.slice(0, at);
+  const domain = email.slice(at + 1).replace(/\.+$/, "");
+  if (!local || !domain) return true;
+
+  if (BLOCKED_EMAIL_DOMAINS.has(domain)) return true;
+
+  const parts = domain.split(".");
+  if (parts.length >= 2) {
+    const baseDomain = parts.slice(-2).join(".");
+    if (baseDomain !== domain && BLOCKED_EMAIL_DOMAINS.has(baseDomain)) return true;
+  }
+
+  if (BLOCKED_EMAIL_LOCALS.has(local)) return true;
+
+  const domainName = parts[0];
+  if (local === domainName && local.length <= 8) return true;
+
+  if (/^\d+$/.test(local) || local.length === 1) return true;
+  if (/^(.)\1{3,}$/.test(local)) return true;
+  if (/^(abc|abcd|abcdef|qwer|qwerty|asdf|zxcv){1,3}$/i.test(local)) return true;
+
+  const tld = parts[parts.length - 1];
+  if (!tld || !/^[a-z]{2,24}$/.test(tld)) return true;
+
+  return false;
+}
+
 function isValidPhone(value) {
   const digits = value.replace(/\D/g, "");
   return digits.length >= 10 && digits.length <= 15;
@@ -1209,6 +1306,40 @@ function validatePayload(body) {
     return { ok: false, message: "Invalid submission.", spam: true };
   }
 
+  const type = clean(body.type || body.formType, 40).toLowerCase();
+  const isSubscribe = type === "subscribe";
+
+  /* Footer / newsletter — email only → CMS leads as Newsletter Subscribe */
+  if (isSubscribe) {
+    const email = clean(body.email, MAX.email);
+    if (!email) {
+      return { ok: false, message: "Please enter your email." };
+    }
+    if (!isValidEmail(email)) {
+      return { ok: false, message: "Please enter a valid email address." };
+    }
+    if (typeof isFakeEmail === "function" && isFakeEmail(email)) {
+      return {
+        ok: false,
+        message:
+          "Please use a real business or personal email. Temporary or fake addresses are not accepted.",
+      };
+    }
+    const local = email.split("@")[0] || "Subscriber";
+    return {
+      ok: true,
+      data: {
+        clientName: clean(body.clientName, MAX.clientName) || local.slice(0, 80),
+        email,
+        phone: "",
+        businessName: "Newsletter",
+        mapsLink: "",
+        service: "Newsletter Subscribe",
+        message: clean(body.message, MAX.message) || "Footer subscribe",
+      },
+    };
+  }
+
   const data = {
     clientName: clean(body.clientName, MAX.clientName),
     email: clean(body.email, MAX.email),
@@ -1231,6 +1362,14 @@ function validatePayload(body) {
 
   if (!isValidEmail(data.email)) {
     return { ok: false, message: "Please enter a valid email address." };
+  }
+
+  if (isFakeEmail(data.email)) {
+    return {
+      ok: false,
+      message:
+        "Please use a real business or personal email. Temporary or fake addresses are not accepted.",
+    };
   }
 
   if (!isValidPhone(data.phone)) {
@@ -3571,7 +3710,18 @@ async function serveAssetWithCms(request, env) {
     ct.includes("text/html");
 
   if (html == null) {
-    if (!isHtml || !res.ok) return res;
+    if (!isHtml || !res.ok) {
+      // Versioned static assets (?v=) — long browser cache; no design change.
+      if (res.ok && /^\/assets\//i.test(url.pathname)) {
+        const headers = new Headers(res.headers);
+        headers.set(
+          "cache-control",
+          "public, max-age=31536000, immutable"
+        );
+        return new Response(res.body, { status: res.status, headers });
+      }
+      return res;
+    }
     html = await res.text();
     status = res.status;
     baseHeaders = new Headers(res.headers);

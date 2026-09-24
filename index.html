@@ -29,95 +29,136 @@
   <meta name="twitter:image" content="https://townloc.com/assets/images/townloc-og.png?v=1" />
   <link rel="icon" href="/assets/images/townloc-favicon.png?v=4" />
   <link rel="apple-touch-icon" href="/assets/images/townloc-favicon.png?v=4" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preconnect" href="https://cdn.tailwindcss.com" />
-  <link rel="dns-prefetch" href="https://cdn.tailwindcss.com" />
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/rajdhani-600-latin.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/rajdhani-400-latin.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/opensans-latin.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/josefin-700-latin.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/josefin-400-latin.woff2" crossorigin />
   <link rel="preload" as="image" href="assets/images/townloc-logo.png?v=6" fetchpriority="high" />
-  <link rel="preload" as="image" href="assets/images/home/hero-banner.jpg?v=2" fetchpriority="high" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="https://fonts.gstatic.com/s/outfit/v15/QGYvz_MVcBeNP4NJtEtq.woff2" />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>document.documentElement.classList.add("js");</script>
+  <link rel="preload" as="image" href="assets/images/home/hero-banner.jpg?v=3" fetchpriority="high" />
+<style id="nav-font-critical">
+    @font-face {
+      font-family: "Open Sans";
+      font-style: normal;
+      font-weight: 400 700;
+      font-stretch: 100%;
+      font-display: swap;
+      src: url("/assets/fonts/opensans-latin.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: Rajdhani;
+      font-style: normal;
+      font-weight: 400;
+      font-display: optional;
+      src: url("/assets/fonts/rajdhani-400-latin.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: Rajdhani;
+      font-style: normal;
+      font-weight: 600;
+      font-display: optional;
+      src: url("/assets/fonts/rajdhani-600-latin.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: Rajdhani;
+      font-style: normal;
+      font-weight: 700;
+      font-display: optional;
+      src: url("/assets/fonts/rajdhani-700-latin.woff2") format("woff2");
+    }
+    #site-header .nav-link,
+    #site-header .nav-drop-btn,
+    #site-header .header-cta {
+      font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
+    }
+
+    @font-face {
+      font-family: "Josefin Sans";
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url("/assets/fonts/josefin-400-latin.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Josefin Sans";
+      font-style: normal;
+      font-weight: 600;
+      font-display: swap;
+      src: url("/assets/fonts/josefin-600-latin.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Josefin Sans";
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      src: url("/assets/fonts/josefin-700-latin.woff2") format("woff2");
+    }
+    .hero-banner .hero-title,
+    .hero-banner .hero-lead {
+      font-family: "Josefin Sans", "Josefin Fallback", sans-serif !important;
+    }
+    .hero-banner .hero-eyebrow {
+      font-family: Rajdhani, "Rajdhani Fallback", system-ui, sans-serif !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.04em !important;
+      text-transform: uppercase !important;
+    }
+  </style>
+  <link rel="stylesheet" href="assets/site.css?v=136" />
+  <link rel="stylesheet" href="assets/tailwind.min.css?v=1" />
+<script>document.documentElement.classList.add("js");</script>
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      document.documentElement.classList.add("is-ready");
-      var banner = document.querySelector(".hero-banner");
-      var img = banner && banner.querySelector(".hero-banner-img");
-      if (!banner || !img) return;
-      var done = false;
-      function markHero() {
-        if (done) return;
-        done = true;
-        banner.classList.add("is-media-ready");
-      }
-      function afterDecode() {
-        if (typeof img.decode === "function") {
-          img.decode().then(markHero).catch(markHero);
-        } else {
-          markHero();
-        }
-      }
-      if (img.complete && img.naturalWidth > 0) afterDecode();
-      else {
-        img.addEventListener("load", afterDecode, { once: true });
-        img.addEventListener("error", markHero, { once: true });
-        window.setTimeout(markHero, 2800);
-      }
-    });
-    window.setTimeout(function () {
-      document.documentElement.classList.add("is-ready");
-    }, 80);
+    (function () {
+      /* Nav stays visible from first paint (local Rajdhani + optional). No hide/show blink. */
+      document.documentElement.classList.add("fonts-ready");
+
+      document.addEventListener("DOMContentLoaded", function () {
+        document.documentElement.classList.add("is-ready");
+        var banner = document.querySelector(".hero-banner");
+        if (!banner) return;
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            banner.classList.add("is-media-ready");
+          });
+        });
+      });
+      window.setTimeout(function () {
+        document.documentElement.classList.add("is-ready");
+      }, 80);
+    })();
   </script>
   <script>
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
   </script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            serif: ["Outfit", "system-ui", "sans-serif"],
-            sans: ["Outfit", "system-ui", "sans-serif"],
-          },
-          colors: {
-            ink: "#111111",
-            paper: "#f7f7f7",
-            mist: "#EEE9DE",
-            muted: "#4a4843",
-            line: "rgba(17,17,17,0.10)",
-            trust: "#00b67a",
-          },
-          boxShadow: {
-            soft: "0 20px 50px -24px rgba(17,17,17,0.28)",
-            lift: "0 12px 40px -18px rgba(17,17,17,0.18)",
-            glow: "0 30px 80px -36px rgba(17,17,17,0.55)",
-          },
-        },
-      },
-    };
-  </script>
-  <style>
+<style>
     html {
       scroll-behavior: smooth;
-      scroll-padding-top: 4.75rem;
+      scroll-padding-top: calc(4.75rem + 7px);
       scrollbar-gutter: stable;
     }
 
-    body,
+    body {
+      background-color: #ffffff;
+      font-family: "Open Sans", "Open Sans Fallback", system-ui, sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.75;
+      color: #555555;
+      word-wrap: break-word;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
     button,
     input,
     select,
     textarea {
-      font-family: Outfit, system-ui, sans-serif;
-      font-size: 17px;
-      line-height: 1.65;
+      font-family: "Open Sans", "Open Sans Fallback", system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.75;
       font-weight: 400;
-      color: #111111;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      text-rendering: optimizeLegibility;
+      color: #555555;
     }
 
     ::selection {
@@ -146,12 +187,13 @@
     }
 
     .section-heading {
-      font-family: Outfit, system-ui, sans-serif;
-      font-size: 2.5rem;
-      line-height: 1.15;
-      letter-spacing: -0.02em;
+      font-family: "Josefin Sans", "Josefin Fallback", system-ui, sans-serif;
+      font-size: 2.25rem;
+      line-height: 1.3;
+      letter-spacing: normal;
       font-weight: 500;
-      color: #111111;
+      font-style: normal;
+      color: #121212;
     }
 
     .body-lg {
@@ -161,7 +203,7 @@
     }
 
     .font-serif {
-      font-family: Outfit, system-ui, sans-serif;
+      font-family: "Josefin Sans", "Josefin Fallback", system-ui, sans-serif;
       font-weight: 500;
     }
 
@@ -232,7 +274,7 @@
     }
 
     #site-header {
-      background: rgba(17, 17, 17, 0.96);
+      background: linear-gradient(90deg, #141414 0%, #0a0a0a 50%, #050505 100%);
       border-color: rgba(255, 255, 255, 0.1);
       color: #ffffff;
       backdrop-filter: blur(18px) saturate(1.2);
@@ -258,9 +300,9 @@
       max-width: 80rem;
       margin-left: auto;
       margin-right: auto;
-      height: 4.5rem;
-      min-height: 4.5rem;
-      max-height: 4.5rem;
+      height: calc(4.5rem + 7px);
+      min-height: calc(4.5rem + 7px);
+      max-height: calc(4.5rem + 7px);
       padding-top: 0 !important;
       padding-bottom: 0 !important;
       padding-left: 0 !important;
@@ -306,52 +348,47 @@
       display: inline-flex;
       align-items: center;
       line-height: 1;
-      background: #ffffff;
-      color: #111111;
-      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.12);
+      background: #1c1c1c;
+      color: #ffffff;
+      font-weight: 600 !important;
+      font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.35);
       transform: translateY(0) scale(1);
       transition:
-        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-        box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        background 0.35s ease,
+        box-shadow 0.35s ease,
+        border-color 0.35s ease;
     }
 
     #site-header .header-cta::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 45%;
-      height: 100%;
-      background: linear-gradient(100deg,
-          transparent 0%,
-          rgba(17, 17, 17, 0.06) 45%,
-          transparent 100%);
-      transform: translateX(-140%) skewX(-18deg);
-      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-      pointer-events: none;
+      display: none;
     }
 
     #site-header .header-cta:hover {
-      background: #ffffff;
-      color: #111111;
+      background: #242424;
+      color: #ffffff;
       opacity: 1;
-      transform: translateY(-3px) scale(1.045);
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.22);
       box-shadow:
-        0 10px 28px -10px rgba(255, 255, 255, 0.55),
-        0 6px 16px -8px rgba(0, 0, 0, 0.45);
+        inset 0 1px 0 rgba(255, 255, 255, 0.32),
+        0 8px 22px -14px rgba(0, 0, 0, 0.55);
     }
 
     #site-header .header-cta:hover::before {
-      transform: translateX(280%) skewX(-18deg);
+      display: none;
     }
 
     #site-header .header-cta:active {
-      background: #ffffff;
-      color: #111111;
-      transform: translateY(-1px) scale(1.02);
-      box-shadow:
-        0 4px 14px -8px rgba(255, 255, 255, 0.4),
-        0 3px 10px -6px rgba(0, 0, 0, 0.35);
+      background: #1c1c1c;
+      color: #ffffff;
+      transform: translateY(0);
       transition-duration: 0.15s;
     }
 
@@ -366,14 +403,14 @@
     #site-header.is-stuck,
     #site-header.is-menu-open.is-stuck,
     #site-header.is-menu-open:not(.is-stuck) {
-      background: rgba(17, 17, 17, 0.98);
+      background: linear-gradient(90deg, #141414 0%, #0a0a0a 50%, #050505 100%);
       border-color: rgba(255, 255, 255, 0.1);
       box-shadow: 0 12px 40px -28px rgba(0, 0, 0, 0.35);
     }
 
     #site-header .header-cta {
-      background: #ffffff;
-      color: #111111;
+      background: #1c1c1c;
+      color: #ffffff;
     }
 
     #site-header .header-mark {
@@ -586,10 +623,23 @@
 
     #mobile-menu .mobile-services .nav-drop-panel {
       margin: 0.35rem 0 0.55rem;
-      border-radius: 1.15rem;
-      border-color: rgba(255, 255, 255, 0.08);
-      background: rgba(255, 255, 255, 0.97);
-      box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.55);
+      width: 100%;
+      max-width: 100%;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    #mobile-menu .mobile-services .nav-drop-item,
+    #mobile-menu .mobile-services .nav-drop-name {
+      color: #ffffff;
+    }
+
+    #mobile-menu .mobile-services .nav-drop-item:hover,
+    #mobile-menu .mobile-services .nav-drop-item:focus-visible {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
     }
 
     #mobile-menu .nav-drop-num {
@@ -597,9 +647,16 @@
     }
 
     #mobile-menu .nav-drop-item {
+      display: flex;
+      width: 100%;
+      box-sizing: border-box;
       padding: 0.78rem 0.85rem;
       border-radius: 0.85rem;
       transition: background 0.22s ease, transform 0.22s ease, color 0.22s ease;
+    }
+
+    #mobile-menu .mobile-services .nav-drop-item + .nav-drop-item {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -619,8 +676,7 @@
       }
     }
 
-    @media (min-width: 768px) {
-
+    @media (min-width: 1024px) {
       #mobile-menu.mobile-menu,
       #mobile-menu {
         display: none !important;
@@ -660,11 +716,15 @@
     }
 
     .nav-drop-menu {
+      left: 0;
+      right: auto;
+      width: max-content;
+      max-width: min(100vw - 2rem, 28rem);
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
-      transform: translateX(-50%) translateY(8px);
-      transform-origin: top center;
+      transform: translateY(8px);
+      transform-origin: top left;
       transition:
         opacity 0.22s ease,
         transform 0.26s cubic-bezier(0.22, 1, 0.36, 1),
@@ -678,34 +738,45 @@
       opacity: 1;
       visibility: visible;
       pointer-events: auto;
-      transform: translateX(-50%) translateY(0);
+      transform: translateY(0);
       transition-delay: 0s, 0s, 0s;
     }
 
     .nav-drop-panel {
-      padding: 0.45rem;
-      border: 1px solid rgba(17, 17, 17, 0.08);
-      background: #ffffff;
+      width: max-content;
+      max-width: 100%;
+      padding: 0.4rem;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 1.15rem;
+      background: #1c1c1c;
       box-shadow:
-        0 12px 28px -18px rgba(17, 17, 17, 0.2),
-        0 32px 64px -32px rgba(17, 17, 17, 0.32);
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.45),
+        0 12px 28px -14px rgba(0, 0, 0, 0.65);
     }
 
     .nav-drop-item {
       display: flex;
       align-items: center;
-      gap: 0.7rem;
-      padding: 0.68rem 0.8rem;
-      border-radius: 0.8rem;
-      color: #111;
+      gap: 0.55rem;
+      width: 100%;
+      padding: 0.62rem 1.1rem;
+      border-radius: 0.85rem;
+      color: #ffffff;
       text-decoration: none;
+      white-space: nowrap;
       transition: background 0.15s ease, color 0.15s ease;
+      font-family: Rajdhani, "Rajdhani Fallback", sans-serif;
+    }
+
+    .nav-drop-item + .nav-drop-item {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .nav-drop-item:hover,
     .nav-drop-item:focus-visible {
-      background: rgba(17, 17, 17, 0.055);
-      color: #111;
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
       outline: none;
     }
 
@@ -720,8 +791,8 @@
 
     .nav-drop-name {
       flex: 1;
-      font-size: 0.9rem;
-      font-weight: 500;
+      font-size: 1rem;
+      font-weight: 400;
       letter-spacing: -0.015em;
       line-height: 1.3;
       transition: transform 0.15s ease;
@@ -867,37 +938,43 @@
       position: relative;
       isolation: isolate;
       display: grid;
-      /* Keep full banner clear of the fixed header (was covering the top of the image). */
-      padding-top: 4.5rem;
-      /* Natural image height — not oversized */
-      min-height: 0;
+      overflow: hidden;
+      /* Keep full banner clear of the fixed header (same as before) */
+      padding-top: calc(4.5rem + 7px);
       color: #F5F1E8;
-      background-color: transparent;
-      background-image: url("assets/images/home/hero-banner.jpg?v=2");
-      background-size: cover;
-      background-position: right bottom;
-      background-repeat: no-repeat;
+      /* Fallback only — image covers; no per-device tint */
+      background-color: #1ea8d9;
+      background-image: none;
     }
 
     .hero-banner-img {
       grid-area: 1 / 1;
       display: block;
       width: 100%;
-      height: auto;
-      /* Keep bottom-right platform corner in frame when any cover crop applies */
+      height: 100%;
+      min-height: 100%;
       object-fit: cover;
-      object-position: right bottom;
-      align-self: start;
+      /* Same frame on every width — bright mid banner, not dark edge */
+      object-position: center center;
+      align-self: stretch;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .hero-banner::after {
+      content: none !important;
+      display: none !important;
     }
 
     .hero-banner-content {
       grid-area: 1 / 1;
+      position: relative;
       z-index: 1;
       display: flex;
       align-items: center;
       box-sizing: border-box;
-      /* Critical layout so size doesn't jump before Tailwind CDN applies */
       width: 100%;
+      /* Previous gaps — matches prior banner padding */
       padding: 2.5rem 1.25rem 3rem;
     }
 
@@ -923,15 +1000,15 @@
       align-items: center;
       gap: 0.5rem;
       margin: 0 0 1.25rem;
-      padding: 0.25rem 0.75rem;
+      padding: 0.35rem 0.9rem;
       border: 1px solid rgba(17, 17, 17, 0.12);
       border-radius: 9999px;
       background: rgba(0, 0, 0, 0.35);
-      color: rgba(255, 255, 255, 0.78);
-      font-family: Outfit, system-ui, sans-serif;
-      font-size: 12px !important;
-      font-weight: 500 !important;
-      letter-spacing: 0.14em;
+      color: #ffffff;
+      font-family: Rajdhani, "Rajdhani Fallback", system-ui, sans-serif !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.04em !important;
       text-transform: uppercase;
       line-height: 1.4;
     }
@@ -944,6 +1021,7 @@
       color: rgba(245, 241, 232, 0.72);
       margin-top: 1.5rem;
       max-width: 36rem;
+      font-size: 15px !important;
     }
 
     .hero-banner .hero-actions {
@@ -987,41 +1065,6 @@
         0 6px 16px -8px rgba(0, 0, 0, 0.45);
     }
 
-    /* ?1211px: image fills full banner behind text/CTAs (not a short top strip) */
-    @media (max-width: 1211px) {
-      .hero-banner-img {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: right bottom;
-        z-index: 0;
-      }
-
-      .hero-banner {
-        /* Content-sized, but enough room that bottom corner stays visible */
-        min-height: clamp(22rem, 52vw, 30rem);
-      }
-
-      .hero-banner::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        z-index: 0;
-        pointer-events: none;
-        background: linear-gradient(to bottom,
-            rgba(10, 10, 10, 0.55) 0%,
-            rgba(10, 10, 10, 0.72) 55%,
-            rgba(10, 10, 10, 0.82) 100%);
-      }
-
-      .hero-banner-content {
-        position: relative;
-        z-index: 1;
-      }
-    }
-
     /* Keep trust strip attached to the hero so it shows in the first view with the banner */
     .hero-banner {
       margin-bottom: 0;
@@ -1059,9 +1102,44 @@
     }
 
     .hero-title {
-      font-size: 3rem;
-      line-height: 1.1;
-      letter-spacing: -0.025em;
+      font-family: "Josefin Sans", Rajdhani, system-ui, sans-serif;
+      font-size: clamp(1.85rem, 4.1vw, 2.65rem);
+      max-width: 17.4em;
+      line-height: 1.14;
+      letter-spacing: normal;
+      font-weight: 700;
+    }
+
+    /* Tablet / Mac / desktop — natural button size (content-hug) */
+    .hero-banner .hero-actions {
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .hero-banner .hero-actions .btn-primary,
+    .hero-banner .hero-actions .btn-secondary {
+      flex: 0 0 auto;
+      min-width: auto;
+      width: auto;
+      white-space: nowrap;
+    }
+
+    /* Mobile only — keep one-line stretched buttons (unchanged behavior) */
+    @media (max-width: 479px) {
+      .hero-banner .hero-actions {
+        flex-wrap: nowrap;
+        align-items: stretch;
+        gap: 0.5rem;
+      }
+      .hero-banner .hero-actions .btn-primary,
+      .hero-banner .hero-actions .btn-secondary {
+        flex: 1 1 0;
+        min-width: 0;
+        justify-content: center;
+        text-align: center;
+        padding-left: 0.85rem;
+        padding-right: 0.85rem;
+      }
     }
 
     .hero-media {
@@ -1202,7 +1280,7 @@
 
     .field-input {
       transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out, background 0.3s ease-in-out;
-      font-family: Outfit, system-ui, sans-serif;
+      font-family: "Open Sans", "Open Sans Fallback", system-ui, sans-serif;
       font-size: 0.875rem !important;
       font-weight: 400 !important;
       line-height: 1.5 !important;
@@ -1216,10 +1294,12 @@
 
     #contact label>span.font-medium,
     #contract-form label>span.font-medium,
-    #contact label>span,
-    #contract-form label>span {
-      font-size: 0.8125rem !important;
+    #contact label>span:not(.text-xs),
+    #contract-form label>span:not(.text-xs) {
+      font-size: 15px !important;
       font-weight: 400 !important;
+      line-height: 1.4 !important;
+      color: #333333 !important;
     }
 
     #contact .field-input,
@@ -1371,8 +1451,7 @@
     }
 
     .site-footer {
-      background: #111111;
-      /* match #site-header */
+      background: #313743;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
 
@@ -1429,7 +1508,7 @@
       gap: 0.65rem;
       font-size: 1.05rem;
       font-weight: 400;
-      color: #F5F1E8;
+      color: #ffffff;
       transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
     }
 
@@ -1459,7 +1538,7 @@
     .footer-tagline {
       margin-top: 0.75rem;
       max-width: 22rem;
-      font-size: 0.875rem;
+      font-size: 15px;
       line-height: 1.65;
       color: #ffffff;
     }
@@ -1519,9 +1598,9 @@
     }
 
     .footer-col-title {
-      font-size: 0.68rem;
+      font-size: 1rem;
       font-weight: 400;
-      letter-spacing: 0.16em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       color: #ffffff;
     }
@@ -1588,7 +1667,7 @@
       display: inline-flex;
       width: fit-content;
       max-width: 100%;
-      font-size: 0.875rem;
+      font-size: 1rem;
       line-height: 1.4;
       color: #ffffff;
       transition:
@@ -1658,7 +1737,7 @@
 
     .footer-guarantee-text {
       margin-top: 0.35rem;
-      font-family: Outfit, system-ui, sans-serif;
+      font-family: "Open Sans", "Open Sans Fallback", system-ui, sans-serif;
       font-weight: 400;
       font-size: 1.05rem;
       line-height: 1.45;
@@ -1679,7 +1758,7 @@
       height: 65px;
       min-height: 65px;
       max-height: 65px;
-      padding: 0;
+      padding: 0 max(1.25rem, calc((100vw - 80rem) / 2));
       border-top: 1px solid rgba(255, 255, 255, 0.08);
       background: #363636 !important;
       display: flex;
@@ -1690,6 +1769,22 @@
       font-size: 0.8125rem;
       color: #ffffff;
     }
+
+    .footer-bottom-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex: 0 0 auto;
+      margin-left: auto;
+    }
+
+    .footer-bottom .footer-cta {
+      flex-shrink: 0;
+      white-space: nowrap;
+      overflow: visible;
+      max-width: none;
+    }
+
 
     @media (max-width: 499px) {
       .footer-bottom {
@@ -1787,7 +1882,7 @@
 
     .journey-label {
       margin-top: 0;
-      font-family: "Outfit", system-ui, sans-serif;
+      font-family: "Josefin Sans", "Josefin Fallback", system-ui, sans-serif;
       font-size: 0.8125rem;
       font-weight: 500;
       line-height: 1.35;
@@ -1864,40 +1959,50 @@
 
     .trust-badges {
       display: grid;
-      gap: 0.75rem;
+      gap: 2rem 1.25rem;
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     @media (min-width: 768px) {
       .trust-badges {
+        gap: 2.5rem 2rem;
         grid-template-columns: repeat(4, minmax(0, 1fr));
       }
     }
 
     .trust-badge {
       display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      border: 1px solid rgba(17, 17, 17, 0.08);
-      border-radius: 1rem;
-      background: #fff;
-      padding: 1rem 1.1rem;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.9rem;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      padding: 0.25rem 0.5rem;
     }
 
     .trust-badge-icon {
       display: grid;
-      height: 2.25rem;
-      width: 2.25rem;
+      height: 2.75rem;
+      width: 2.75rem;
       flex-shrink: 0;
       place-items: center;
-      border-radius: 0.65rem;
-      background: rgba(17, 17, 17, 0.06);
-      color: #111;
+      border-radius: 0;
+      background: transparent;
+      color: #7b6fd4;
+      padding: 0;
     }
 
     .trust-badge-icon svg {
-      height: 1.1rem;
-      width: 1.1rem;
+      height: 2.35rem;
+      width: 2.35rem;
+      stroke-width: 1.5;
+    }
+
+    #trust-strip .trust-badge > div {
+      min-width: 0;
+      max-width: 16rem;
     }
 
     .process-icon {
@@ -2093,10 +2198,15 @@
       text-align: left;
     }
 
+    /* How-it-works cards — keep roomy padding; do not center/squeeze on desktop */
+    #process .process-step {
+      padding: 1.75rem 1.5rem !important;
+      text-align: left !important;
+    }
+
     @media (min-width: 1024px) {
-      .process-step {
-        padding: 0 1.25rem;
-        text-align: center;
+      #process .process-step {
+        padding: 2rem 1.65rem !important;
       }
     }
 
@@ -2118,7 +2228,7 @@
     }
 
     .process-num {
-      font-family: Outfit, system-ui, sans-serif;
+      font-family: "Josefin Sans", "Josefin Fallback", system-ui, sans-serif;
       font-weight: 500;
       font-size: clamp(2.5rem, 4vw, 3.5rem);
       line-height: 1;
@@ -2157,16 +2267,24 @@
     }
 
     .trust-compact-heading {
-      font-size: 2.5rem;
+      font-size: 2rem;
       line-height: 1.15;
-      letter-spacing: -0.02em;
+      letter-spacing: normal;
     }
 
     .trust-compact-lead {
       margin-top: 1rem;
-      font-size: clamp(1.2rem, 2vw, 1.45rem);
-      line-height: 1.3;
-      letter-spacing: -0.015em;
+      font-family: "Open Sans", "Open Sans Fallback", system-ui, sans-serif !important;
+      font-size: 14px !important;
+      font-weight: 400 !important;
+      line-height: 1.75 !important;
+      letter-spacing: normal;
+    }
+
+    .trust-compact-note,
+    .trust-principle > p:not(.trust-principle-num) {
+      font-family: "Open Sans", "Open Sans Fallback", system-ui, sans-serif !important;
+      font-weight: 400 !important;
     }
 
     .trust-compact-note {
@@ -2193,7 +2311,7 @@
     }
 
     .trust-principle-num {
-      font-family: Outfit, system-ui, sans-serif;
+      font-family: "Josefin Sans", "Josefin Fallback", system-ui, sans-serif;
       font-weight: 500;
       font-size: 0.8125rem;
       line-height: 1;
@@ -2297,9 +2415,9 @@
     }
 
     .work-compact-heading {
-      font-size: 2.5rem;
+      font-size: 2rem;
       line-height: 1.15;
-      letter-spacing: -0.02em;
+      letter-spacing: normal;
     }
 
     .faq-wrap {
@@ -2330,6 +2448,7 @@
       transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
       cursor: pointer;
       box-shadow: 0 12px 40px -18px rgba(17, 17, 17, 0.35);
+      flex-shrink: 0;
     }
 
     .back-to-top.is-visible {
@@ -2337,6 +2456,8 @@
       visibility: visible;
       transform: translateY(0);
     }
+
+
 
     .back-to-top:hover {
       opacity: 0.92;
@@ -2410,26 +2531,26 @@
     }
 
     .text-sm {
-      font-size: 0.975rem !important;
-      line-height: 1.65 !important;
+      font-size: 14px !important;
+      line-height: 1.75 !important;
       font-weight: 400 !important;
     }
 
     /* Paragraph-only size lock — do not shrink headlines */
     p.text-base:not(.font-serif),
     p.text-lg:not(.font-serif) {
-      font-size: 0.975rem !important;
-      line-height: 1.65 !important;
+      font-size: 14px !important;
+      line-height: 1.75 !important;
       font-weight: 400 !important;
     }
 
-    /* Every body paragraph: Outfit @ 0.975rem (screenshot look) */
+    /* Every body paragraph: Open Sans (amzgetway theme body) */
     p:not(.font-serif):not(.text-xs):not(.journey-label):not(.hero-eyebrow),
     .body-lg,
     .svc-lead {
-      font-family: Outfit, system-ui, sans-serif !important;
-      font-size: 0.975rem !important;
-      line-height: 1.65 !important;
+      font-family: "Open Sans", "Open Sans Fallback", system-ui, sans-serif !important;
+      font-size: 14px !important;
+      line-height: 1.75 !important;
       font-weight: 400 !important;
     }
 
@@ -2439,7 +2560,7 @@
 
     /* Card / inline subheadings (were serif) */
     p.font-serif {
-      font-family: Outfit, system-ui, sans-serif !important;
+      font-family: "Josefin Sans", "Josefin Fallback", system-ui, sans-serif !important;
       font-weight: 500 !important;
       line-height: 1.35 !important;
     }
@@ -2454,19 +2575,22 @@
 
     /* Keep these section cards unchanged */
     #trust-strip .trust-badge p.text-sm {
-      font-size: 0.875rem !important;
-      line-height: 1.4 !important;
+      margin: 0 !important;
+      font-size: 1.0625rem !important;
+      line-height: 1.3 !important;
       font-weight: 500 !important;
-      font-family: Outfit, system-ui, sans-serif !important;
+      font-family: "Josefin Sans", "Josefin Fallback", system-ui, sans-serif !important;
+      color: #121212 !important;
     }
 
     #trust-strip .trust-badge p.text-xs {
-      font-size: 0.85rem !important;
-      line-height: 1.45 !important;
+      margin: 0.55rem 0 0 !important;
+      font-size: 0.9375rem !important;
+      line-height: 1.55 !important;
       font-weight: 400 !important;
       letter-spacing: 0rem !important;
-      color: #282727 !important;
-      font-family: Outfit, system-ui, sans-serif !important;
+      color: #555555 !important;
+      font-family: "Open Sans", "Open Sans Fallback", system-ui, sans-serif !important;
     }
 
     #journey .journey-label,
@@ -2474,7 +2598,7 @@
       font-size: 0.8125rem !important;
       line-height: 1.35 !important;
       font-weight: 500 !important;
-      font-family: Outfit, system-ui, sans-serif !important;
+      font-family: "Open Sans", "Open Sans Fallback", system-ui, sans-serif !important;
     }
 
     .section-heading,
@@ -2486,25 +2610,34 @@
     .work-row-title,
     .work-compact-heading,
     .trust-compact-heading {
-      font-family: Outfit, system-ui, sans-serif !important;
+      font-family: "Josefin Sans", "Josefin Fallback", system-ui, sans-serif !important;
       font-weight: 500 !important;
-      letter-spacing: -0.02em;
+      letter-spacing: normal;
     }
 
-    .section-heading,
+    .section-heading {
+      color: #121212;
+      font-family: "Josefin Sans", "Josefin Fallback", sans-serif;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
     .hero-title {
-      color: #111111;
+      color: #121212;
+      font-family: "Josefin Sans", "Josefin Fallback", sans-serif;
+      font-weight: 700;
+      line-height: 1.3;
     }
 
-    /* Non-hero section main headlines — unified 2.5rem */
+    /* Non-hero section main headlines — smaller (banner untouched) */
     .section-heading,
     .work-compact-heading,
     .trust-compact-heading,
-    main section h2.font-serif,
-    main section h2.section-heading {
-      font-size: 2.5rem !important;
+    main section:not(.hero-banner) h2.font-serif,
+    main section:not(.hero-banner) h2.section-heading {
+      font-size: 2rem !important;
       line-height: 1.15 !important;
-      letter-spacing: -0.02em !important;
+      letter-spacing: normal !important;
     }
 
     .text-xs.font-medium,
@@ -2539,98 +2672,74 @@
 
     .text-xs.uppercase,
     .text-xs.font-medium.uppercase {
-      font-family: Outfit, "Outfit Fallback", system-ui, sans-serif !important;
+      font-family: "Josefin Sans", "Josefin Fallback", system-ui, sans-serif !important;
       font-weight: 400 !important;
       text-transform: uppercase;
       letter-spacing: 0.1em !important;
     }
 
     .text-muted {
-      color: #4a4843 !important;
+      color: #7A7A7A !important;
     }
 
-    .text-ink\/25 {
-      color: rgba(17, 17, 17, 0.42) !important;
+    .text-ink\/25 { color: #9a9a9a !important; }
+    .text-ink\/30 { color: #8e8e8e !important; }
+    .text-ink\/35 { color: #858585 !important; }
+    .text-ink\/40 { color: #7A7A7A !important; letter-spacing: 0rem !important; font-size: 0.95rem !important; }
+    .text-ink\/45 { color: #7A7A7A !important; }
+    .text-ink\/50 { color: #6e6e6e !important; }
+    .text-ink\/55 { color: #555555 !important; }
+    .text-ink\/60 { color: #555555 !important; }
+    .text-ink\/65 { color: #54595F !important; }
+    .text-ink\/70 { color: #333333 !important; }
+
+    .text-black\/45 { color: #7A7A7A !important; }
+    .text-black\/55 { color: #555555 !important; }
+    .text-black\/60 { color: #54595F !important; }
+
+    .footer-col-title {
+      font-weight: 500 !important;
+      font-size: 1rem !important;
+      letter-spacing: 0.12em;
+      color: #ffffff !important;
+      font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
+      text-transform: uppercase;
     }
 
-    .text-ink\/30 {
-      color: rgba(17, 17, 17, 0.48) !important;
-    }
-
-    .text-ink\/35 {
-      color: rgba(17, 17, 17, 0.52) !important;
-    }
-
-    .text-ink\/40 {
-      color: #2c2727 !important;
-      letter-spacing: 0rem !important;
-      font-size: 0.95rem !important;
-    }
-
-    .text-ink\/45 {
-      color: rgba(17, 17, 17, 0.62) !important;
-    }
-
-    .text-ink\/50 {
-      color: rgba(17, 17, 17, 0.66) !important;
-    }
-
-    .text-ink\/55 {
-      color: rgba(17, 17, 17, 0.72) !important;
-    }
-
-    .text-ink\/60 {
-      color: rgba(17, 17, 17, 0.76) !important;
-    }
-
-    .text-ink\/65 {
-      color: rgba(17, 17, 17, 0.8) !important;
-    }
-
-    .text-ink\/70 {
-      color: rgba(17, 17, 17, 0.84) !important;
-    }
-
-    .text-black\/45 {
-      color: rgba(0, 0, 0, 0.62) !important;
-    }
-
-    .text-black\/55 {
-      color: rgba(0, 0, 0, 0.7) !important;
-    }
-
-    .text-black\/60 {
-      color: rgba(0, 0, 0, 0.76) !important;
-    }
-
-    .footer-col-title,
     .footer-guarantee-label {
-      font-weight: 400 !important;
+      font-weight: 500 !important;
       font-size: 0.75rem !important;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.12em;
+      color: #ffffff !important;
+      font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
+    }
+
+    .footer-ownership li {
+      font-weight: 400 !important;
+      font-size: 0.875rem !important;
       color: #ffffff !important;
     }
 
-    .footer-ownership li,
     .footer-tagline {
       font-weight: 400 !important;
-      font-size: 0.9375rem !important;
+      font-size: 15px !important;
       color: #ffffff !important;
     }
 
     .footer-col a {
       font-weight: 400 !important;
-      font-size: 0.9375rem !important;
+      font-size: 1rem !important;
       color: #ffffff !important;
     }
 
     .footer-col a:hover,
     .footer-col a[aria-current="page"] {
-      color: #ffffff !important;
+      color: #FFFFFF !important;
       transform: translateX(4px);
     }
 
     .footer-bottom {
+      background: #363636 !important;
       font-weight: 400 !important;
       font-size: 0.8125rem !important;
       color: #ffffff !important;
@@ -2642,7 +2751,7 @@
     }
 
     .footer-email:hover {
-      color: #ffffff !important;
+      color: #FFFFFF !important;
     }
 
     .footer-logo:hover {
@@ -2654,13 +2763,14 @@
     }
 
     .footer-logo {
-      color: #ffffff !important;
-      font-weight: 400 !important;
+      color: #E7E9EE !important;
+      font-weight: 600 !important;
+      font-family: "Josefin Sans", "Josefin Fallback", sans-serif !important;
     }
 
     .footer-mark {
-      color: #ffffff !important;
-      background: rgba(255, 255, 255, 0.16) !important;
+      color: #E7E9EE !important;
+      background: rgba(255, 255, 255, 0.12) !important;
     }
 
     .footer-guarantee-text {
@@ -2680,8 +2790,18 @@
     #site-header .nav-drop-btn {
       opacity: 1 !important;
       color: #ffffff !important;
-      font-weight: 400 !important;
-      font-size: 1.14rem !important;
+      font-weight: 600 !important;
+      font-size: 1rem !important;
+      font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
+      letter-spacing: 0.04em !important;
+      text-transform: uppercase !important;
+    }
+
+    #site-header .nav-pill .nav-link:hover,
+    #site-header .nav-pill .nav-drop-btn:hover,
+    #site-header .nav-pill .nav-link.is-active,
+    #site-header .nav-pill .nav-drop.is-open > .nav-drop-btn {
+      color: #ffffff !important;
     }
 
     #site-header .text-\[15px\] {
@@ -2711,15 +2831,16 @@
     .nav-drop-name {
       font-size: 0.95rem !important;
       font-weight: 400 !important;
+      color: #000000 !important;
+      font-family: Rajdhani, "Rajdhani Fallback", sans-serif !important;
     }
 
-    /* Hero page-load animation only */
+    /* Hero page-load — copy fade-up; image stays solid */
     @keyframes hero-fade-up {
       from {
         opacity: 0;
         transform: translate3d(0, 10px, 0);
       }
-
       to {
         opacity: 1;
         transform: translate3d(0, 0, 0);
@@ -2728,64 +2849,63 @@
 
     @media (prefers-reduced-motion: no-preference) {
 
+      html.js .hero-banner .hero-banner-img {
+        opacity: 1;
+        animation: none;
+      }
+
       html.js .hero-banner .hero-eyebrow,
       html.js .hero-banner .hero-title,
       html.js .hero-banner .hero-lead,
       html.js .hero-banner .hero-actions,
-      html.js #trust-strip.hero-trust-strip>.mx-auto>p,
+      html.js #trust-strip.hero-trust-strip > .mx-auto > p,
       html.js #trust-strip.hero-trust-strip .trust-badge {
         opacity: 0;
-      }
-
-      /* Banner image stays visible — no flash */
-      html.js .hero-banner .hero-banner-img {
-        opacity: 1;
-        animation: none;
       }
 
       html.js .hero-banner.is-media-ready .hero-eyebrow,
       html.js .hero-banner.is-media-ready .hero-title,
       html.js .hero-banner.is-media-ready .hero-lead,
       html.js .hero-banner.is-media-ready .hero-actions,
-      html.js .hero-banner.is-media-ready~#trust-strip.hero-trust-strip>.mx-auto>p,
-      html.js .hero-banner.is-media-ready~#trust-strip.hero-trust-strip .trust-badge {
-        animation: hero-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+      html.js .hero-banner.is-media-ready ~ #trust-strip.hero-trust-strip > .mx-auto > p,
+      html.js .hero-banner.is-media-ready ~ #trust-strip.hero-trust-strip .trust-badge {
+        animation: hero-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
       }
 
       html.js .hero-banner.is-media-ready .hero-eyebrow {
-        animation-delay: 0.18s;
+        animation-delay: 0.08s;
       }
 
       html.js .hero-banner.is-media-ready .hero-title {
-        animation-delay: 0.26s;
+        animation-delay: 0.16s;
       }
 
       html.js .hero-banner.is-media-ready .hero-lead {
-        animation-delay: 0.34s;
+        animation-delay: 0.26s;
       }
 
       html.js .hero-banner.is-media-ready .hero-actions {
-        animation-delay: 0.42s;
+        animation-delay: 0.36s;
       }
 
-      html.js .hero-banner.is-media-ready~#trust-strip.hero-trust-strip>.mx-auto>p {
-        animation-delay: 0.5s;
+      html.js .hero-banner.is-media-ready ~ #trust-strip.hero-trust-strip > .mx-auto > p {
+        animation-delay: 0.48s;
       }
 
-      html.js .hero-banner.is-media-ready~#trust-strip.hero-trust-strip .trust-badge:nth-child(1) {
-        animation-delay: 0.54s;
+      html.js .hero-banner.is-media-ready ~ #trust-strip.hero-trust-strip .trust-badge:nth-child(1) {
+        animation-delay: 0.52s;
       }
 
-      html.js .hero-banner.is-media-ready~#trust-strip.hero-trust-strip .trust-badge:nth-child(2) {
+      html.js .hero-banner.is-media-ready ~ #trust-strip.hero-trust-strip .trust-badge:nth-child(2) {
         animation-delay: 0.58s;
       }
 
-      html.js .hero-banner.is-media-ready~#trust-strip.hero-trust-strip .trust-badge:nth-child(3) {
-        animation-delay: 0.62s;
+      html.js .hero-banner.is-media-ready ~ #trust-strip.hero-trust-strip .trust-badge:nth-child(3) {
+        animation-delay: 0.64s;
       }
 
-      html.js .hero-banner.is-media-ready~#trust-strip.hero-trust-strip .trust-badge:nth-child(4) {
-        animation-delay: 0.66s;
+      html.js .hero-banner.is-media-ready ~ #trust-strip.hero-trust-strip .trust-badge:nth-child(4) {
+        animation-delay: 0.70s;
       }
     }
 
@@ -2801,6 +2921,65 @@
         animation: none !important;
         opacity: 1 !important;
         transform: none !important;
+      }
+    }
+
+    /* Live support WhatsApp — edge / wall tab */
+    .live-support-wa {
+      position: fixed;
+      top: 72%;
+      right: 0;
+      z-index: 61;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.85rem 0.55rem 1rem;
+      text-decoration: none;
+      color: #fff;
+      background: #25d366;
+      border-radius: 0.75rem 0 0 0.75rem;
+      box-shadow: -6px 8px 24px rgba(17, 17, 17, 0.18);
+      transform: translateY(-50%);
+      transition: padding-right 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    }
+
+    .live-support-wa:hover {
+      padding-right: 0.7rem;
+      background: #20bd5a;
+      box-shadow: -8px 10px 28px rgba(17, 17, 17, 0.22);
+    }
+
+    .live-support-wa-icon {
+      display: grid;
+      place-items: center;
+      width: 1.55rem;
+      height: 1.55rem;
+      flex-shrink: 0;
+    }
+
+    .live-support-wa-icon svg {
+      width: 1.55rem;
+      height: 1.55rem;
+      display: block;
+    }
+
+    .live-support-wa-text {
+      font-family: "Josefin Sans", "Josefin Fallback", system-ui, sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1.1;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+      white-space: nowrap;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .live-support-wa {
+        transition: none;
       }
     }
   </style>
@@ -2883,7 +3062,7 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="assets/site.css?v=65" />
+  <link rel="stylesheet" href="assets/amz-text.css?v=64" />
 </head>
 
 <body class="bg-paper text-ink antialiased">
@@ -2898,7 +3077,7 @@
         <img class="site-logo site-logo-header" src="assets/images/townloc-logo.png?v=6" alt="Townloc" width="151"
           height="45" decoding="sync" fetchpriority="high" />
       </a>
-      <ul class="hidden items-center gap-8 text-sm md:flex">
+      <ul class="nav-pill hidden items-center gap-8 text-sm lg:flex">
         <li class="nav-drop relative">
           <button type="button" class="nav-drop-btn nav-link inline-flex items-center gap-1 opacity-85"
             aria-expanded="false" aria-haspopup="true">
@@ -2908,8 +3087,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
             </svg>
           </button>
-          <div class="nav-drop-menu absolute left-1/2 top-full z-50 w-[min(22rem,calc(100vw-2rem))] pt-3">
-            <div class="nav-drop-panel rounded-[1.35rem] p-1.5">
+          <div class="nav-drop-menu absolute left-0 top-full z-50 pt-3">
+            <div class="nav-drop-panel">
               <a class="nav-drop-item" href="services/google-business-profile-setup.html"><span
                   class="nav-drop-num">01</span><span class="nav-drop-name">Google Business Profile</span><span
                   class="nav-drop-arrow">→</span></a>
@@ -2929,7 +3108,7 @@
             </div>
           </div>
         </li>
-        <li><a class="nav-link opacity-85" href="#industries">Industries</a></li>
+        <li><a class="nav-link opacity-85" data-nav="industries" href="#industries">Industries</a></li>
         <li><a class="nav-link opacity-85" data-nav="work" href="#work">Work</a></li>
         <li><a class="nav-link opacity-85" data-nav="trust" href="#trust">Trust</a></li>
         <li><a class="nav-link opacity-85" data-nav="faq" href="#faq">FAQ</a></li>
@@ -2937,10 +3116,10 @@
       </ul>
       <div class="flex items-center gap-3">
         <a href="#contact" data-cms="header.ctaText"
-          class="header-cta hidden rounded-full bg-white text-ink px-4 py-2 text-sm font-medium md:inline-flex">Get
+          class="header-cta hidden rounded-full bg-white text-ink px-4 py-2 text-sm font-semibold lg:inline-flex">Get
           Started</a>
         <button id="menu-btn"
-          class="grid h-10 w-10 place-items-center rounded-full border border-white/20 transition-all duration-300 ease-in-out md:hidden"
+          class="grid h-10 w-10 place-items-center rounded-full border border-white/20 transition-all duration-300 ease-in-out lg:hidden"
           aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
           <svg id="icon-open" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
             <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16" />
@@ -2952,7 +3131,7 @@
         </button>
       </div>
     </nav>
-    <div id="mobile-menu" class="mobile-menu md:hidden" aria-hidden="true">
+    <div id="mobile-menu" class="mobile-menu lg:hidden" aria-hidden="true">
       <div class="mobile-menu-inner">
         <div class="mobile-menu-nav">
           <div class="mobile-menu-item">
@@ -2965,7 +3144,7 @@
             </button>
             <div id="mobile-services" class="mobile-services">
               <div class="mobile-services-clip">
-                <div class="nav-drop-panel rounded-[1.35rem] p-1.5">
+                <div class="nav-drop-panel">
                   <a class="nav-drop-item mobile-link" href="services/google-business-profile-setup.html"><span
                       class="nav-drop-num">01</span><span class="nav-drop-name">Google Business Profile</span></a>
                   <a class="nav-drop-item mobile-link" href="services/google-maps-review-management.html"><span
@@ -2994,7 +3173,7 @@
 
   <main id="main" class="bg-paper">
     <section class="hero-banner">
-      <img class="hero-banner-img" data-cms-src="page.hero_image" src="assets/images/home/hero-banner.jpg?v=2" alt=""
+      <img class="hero-banner-img" data-cms-src="page.hero_image" src="assets/images/home/hero-banner.jpg?v=3" alt=""
         width="1024" height="358" decoding="sync" fetchpriority="high" loading="eager" />
       <div class="hero-banner-content px-5 pt-10 pb-12 lg:px-8 lg:pt-12 lg:pb-16">
         <div class="mx-auto w-full max-w-7xl">
@@ -3018,13 +3197,10 @@
     </section>
 
     <section id="trust-strip"
-      class="hero-trust-strip border-b border-line bg-paper px-5 pb-8 pt-6 lg:px-8 lg:pb-10 lg:pt-8"
+      class="hero-trust-strip border-b border-line bg-paper px-5 pb-10 pt-8 lg:px-8 lg:pb-14 lg:pt-12"
       aria-label="Why businesses choose Townloc">
       <div class="mx-auto max-w-7xl">
-        <p class="text-center text-xs font-medium uppercase tracking-[0.22em] text-ink/45" data-cms="page.trust_label">
-          Why Businesses Choose
-          Townloc</p>
-        <div class="trust-badges mt-6">
+        <div class="trust-badges">
           <div class="trust-badge">
             <span class="trust-badge-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
@@ -3251,98 +3427,6 @@
       </div>
     </section>
 
-    <section id="journey" class="border-t border-line bg-paper px-5 py-14 lg:px-8 lg:py-20">
-      <div class="mx-auto max-w-7xl">
-        <div class="max-w-2xl">
-          <p data-cms="page.journey_eyebrow" class="text-xs font-medium uppercase tracking-[0.22em] text-muted">How they
-            work together</p>
-          <h2 data-cms="page.journey_title" class="mt-3 font-serif text-4xl tracking-tight sm:text-5xl">They stack. They
-            do not replace each other.
-          </h2>
-          <p class="mt-4 text-muted" data-cms="page.journey_lead">A complete Google Business Profile tells the truth.
-            Reviews make the tap feel
-            safe. Ads can buy the click. A website gives it somewhere to land.</p>
-        </div>
-        <div class="journey-scroll reveal mt-8">
-          <div class="journey-flow">
-            <div class="journey-step">
-              <span class="journey-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="11" cy="11" r="7" />
-                  <path d="M20 20l-3.5-3.5" />
-                </svg></span>
-              <p class="journey-label">Google Search</p>
-            </div>
-
-            <div class="journey-step">
-              <span class="journey-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 21s7-4.5 7-11a7 7 0 10-14 0c0 6.5 7 11 7 11z" />
-                  <circle cx="12" cy="10" r="2.5" />
-                </svg></span>
-              <p class="journey-label">Google Business Profile</p>
-            </div>
-
-            <div class="journey-step">
-              <span class="journey-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6z" />
-                </svg></span>
-              <p class="journey-label">Remove Negative Reviews</p>
-            </div>
-
-            <div class="journey-step">
-              <span class="journey-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M3 12h18" />
-                  <path d="M12 3a15.3 15.3 0 010 18" />
-                  <path d="M12 3a15.3 15.3 0 000 18" />
-                </svg></span>
-              <p class="journey-label">Website Building</p>
-            </div>
-
-            <div class="journey-step">
-              <span class="journey-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="11" cy="11" r="7" />
-                  <path d="M20 20l-3.5-3.5" />
-                </svg></span>
-              <p class="journey-label">Local SEO</p>
-            </div>
-
-            <div class="journey-step">
-              <span class="journey-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 11l18-8v18L3 13v-2z" />
-                  <path d="M11.5 15.5L16 7" />
-                </svg></span>
-              <p class="journey-label">Google Ads</p>
-            </div>
-
-            <div class="journey-step">
-              <span class="journey-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6z" />
-                </svg></span>
-              <p class="journey-label">Google Reviews</p>
-            </div>
-
-            <div class="journey-step journey-step-final">
-              <span class="journey-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                  <path
-                    d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.12.86.3 1.7.54 2.5a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.58-1.11a2 2 0 012.11-.45c.8.24 1.64.42 2.5.54A2 2 0 0122 16.92z" />
-                </svg></span>
-              <p class="journey-label">Call / Booking / Quote</p>
-            </div>
-          </div>
-          <span class="journey-scroll-arrow" aria-hidden="true">→</span>
-        </div>
-        <p data-cms="page.journey_footer"
-          class="reveal mt-8 text-center text-sm uppercase tracking-[0.16em] text-muted">One Customer Journey</p>
-      </div>
-    </section>
 
     <section id="industries" class="section-pad border-t border-line px-5 lg:px-8">
       <div class="mx-auto max-w-7xl">
@@ -3496,7 +3580,7 @@
           <h2 data-cms="page.process_title" class="mt-3 font-serif text-4xl tracking-tight sm:text-5xl">From assessment
             to assets you own.</h2>
         </div>
-        <div class="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div class="mt-8 grid gap-7 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
           <div class="reveal process-step rounded-2xl border border-line bg-white p-6">
             <div class="process-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
@@ -3676,7 +3760,7 @@
               around trust</p>
             <h2 data-cms="page.trust_title" class="trust-compact-heading mt-2 font-serif tracking-tight">Transparent,
               measurable local marketing built around your business.</h2>
-            <p class="trust-compact-lead font-serif tracking-tight">Your
+            <p class="trust-compact-lead body-lg text-muted" data-cms="page.trust_lead">Your
               business should own its growth system.</p>
             <p class="trust-compact-note">Until we have permission to publish real client reviews,
               we show how we work — not invented testimonials.</p>
@@ -3810,7 +3894,7 @@
             </div>
           </details>
           <details class="py-5">
-            <summary class="flex items-center justify-between gap-4 text-base font-medium">Do I keep my Google
+            <summary class="flex items-center justify-between gap-4 font-medium">Do I keep my Google
               account?<span class="text-ink/30">+</span></summary>
             <div class="faq-panel">
               <p class="mt-3 text-muted">Yes. The Business Profile stays in an account in your
@@ -3926,6 +4010,18 @@
           <p class="footer-tagline" data-cms="footer.tagline">Local Google marketing for businesses that already do good
             work — Google Business
             Profile, reviews, ads, and websites you own.</p>
+          <form id="footer-subscribe-form" class="footer-subscribe" novalidate>
+<div class="footer-subscribe-row">
+              <label class="visually-hidden" for="footer-subscribe-email">Email</label>
+              <input id="footer-subscribe-email" class="footer-subscribe-input" type="email" name="email" required
+                placeholder="Email address" autocomplete="email" inputmode="email" />
+              <input type="text" name="website2" class="footer-subscribe-hp" tabindex="-1" autocomplete="off"
+                aria-hidden="true" />
+              <button type="submit" class="footer-subscribe-btn">SUBSCRIBE</button>
+            </div>
+            <p id="footer-subscribe-msg" class="footer-subscribe-msg" role="status" hidden></p>
+          </form>
+
         </div>
         <div class="footer-col">
           <p class="footer-col-title">Services</p>
@@ -4002,7 +4098,18 @@
     </form>
   </dialog>
 
-  <script src="assets/site.js?v=17" defer></script>
+  <a class="live-support-wa" href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer"
+    aria-label="Live support on WhatsApp">
+    <span class="live-support-wa-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+      </svg>
+    </span>
+    <span class="live-support-wa-text">Live Support</span>
+  </a>
+
+  <script src="assets/site.js?v=29" defer></script>
   <script src="assets/cms.js" defer></script>
 </body>
 

@@ -22,6 +22,7 @@ export const CMS_DEFAULTS = {
       "100% Full Access & Source-Code Ownership | Free Cloudflare Hosting & SSL Setup | Pay Only for Your Domain",
     copyrightText: "Townloc. All rights reserved.",
     ctaText: "Get a Free Assessment",
+    subscribeLabel: "SUBSCRIBE",
   },
   /** Auto-scanned header/footer menu overrides: { header: { "text:0": "…" }, footer: {…} } */
   layout: {
@@ -418,6 +419,12 @@ export const CMS_FIELD_META = {
       label: "Footer tagline",
       type: "textarea",
       hint: "Text under the footer logo.",
+    },
+    {
+      key: "subscribeLabel",
+      label: "Footer subscribe label",
+      type: "text",
+      hint: "Heading above the footer email signup.",
     },
     {
       key: "servicesTitle",

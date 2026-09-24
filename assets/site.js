@@ -4,31 +4,16 @@
   document.documentElement.classList.add("js");
   document.documentElement.classList.add("is-ready");
 
-  /* Smooth hero media: image fade-up first, then copy (same motion). */
+  /* Smooth hero media: wait for fonts + image, then fade copy (animations kept). */
   (function readyHeroBanner() {
+    document.documentElement.classList.add("fonts-ready");
     var banner = document.querySelector(".hero-banner");
-    var img = banner && banner.querySelector(".hero-banner-img");
-    if (!banner || !img) return;
-    var done = false;
-    function mark() {
-      if (done) return;
-      done = true;
-      banner.classList.add("is-media-ready");
-    }
-    function afterDecode() {
-      if (typeof img.decode === "function") {
-        img.decode().then(mark).catch(mark);
-      } else {
-        mark();
-      }
-    }
-    if (img.complete && img.naturalWidth > 0) {
-      afterDecode();
-      return;
-    }
-    img.addEventListener("load", afterDecode, { once: true });
-    img.addEventListener("error", mark, { once: true });
-    window.setTimeout(mark, 2800);
+    if (!banner) return;
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        banner.classList.add("is-media-ready");
+      });
+    });
   })();
 
   var siteHeader = document.getElementById("site-header");
@@ -40,7 +25,7 @@
     window.addEventListener("scroll", onScroll, { passive: true });
   }
 
-  var sections = ["work", "trust", "faq", "contact"];
+  var sections = ["industries", "work", "trust", "faq", "contact"];
   var navLinks = document.querySelectorAll("[data-nav]");
   function markNav() {
     var current = "";
@@ -628,6 +613,78 @@
   toggleBackToTop();
   window.addEventListener("scroll", toggleBackToTop, { passive: true });
 
+  var yearElEarly = document.getElementById("year");
+  if (yearElEarly) yearElEarly.textContent = String(new Date().getFullYear());
+
+  /* Footer subscribe → POST /api/contact (type=subscribe) → CMS leads */
+  (function initFooterSubscribe() {
+    var subForm = document.getElementById("footer-subscribe-form");
+    if (!subForm) return;
+    var emailInput = document.getElementById("footer-subscribe-email");
+    var msgEl = document.getElementById("footer-subscribe-msg");
+    var btn = subForm.querySelector('button[type="submit"]');
+
+    function setMsg(text, kind) {
+      if (!msgEl) return;
+      msgEl.hidden = !text;
+      msgEl.textContent = text || "";
+      msgEl.classList.remove("is-error", "is-ok");
+      if (kind) msgEl.classList.add(kind);
+    }
+
+    function okEmail(value) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    }
+
+    subForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var email = emailInput ? emailInput.value.trim() : "";
+      if (emailInput) emailInput.classList.remove("is-invalid");
+      if (!email || !okEmail(email)) {
+        if (emailInput) emailInput.classList.add("is-invalid");
+        setMsg("Enter a valid email address.", "is-error");
+        return;
+      }
+      var hp = subForm.elements["website2"];
+      if (btn) btn.disabled = true;
+      setMsg("Sending…", "");
+      fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "subscribe",
+          email: email,
+          website2: hp ? hp.value : "",
+        }),
+      })
+        .then(function (res) {
+          return res.json().then(function (body) {
+            return { ok: res.ok, body: body };
+          }).catch(function () {
+            return { ok: false, body: null };
+          });
+        })
+        .then(function (result) {
+          if (!result.body || result.body.success !== true) {
+            setMsg(
+              (result.body && result.body.message) ||
+                "Could not subscribe. Try again.",
+              "is-error"
+            );
+            return;
+          }
+          setMsg("You're on the list. Thank you.", "is-ok");
+          subForm.reset();
+        })
+        .catch(function () {
+          setMsg("Could not reach the server. Try again.", "is-error");
+        })
+        .finally(function () {
+          if (btn) btn.disabled = false;
+        });
+    });
+  })();
+
   var form = document.getElementById("contract-form");
   if (!form) return;
 
@@ -673,6 +730,113 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   }
 
+  /* Block disposable / obviously fake emails so spam can't submit. */
+  var BLOCKED_EMAIL_DOMAINS = {
+    "mailinator.com": 1,
+    "guerrillamail.com": 1,
+    "guerrillamail.net": 1,
+    "sharklasers.com": 1,
+    "grr.la": 1,
+    "guerrillamailblock.com": 1,
+    "pokemail.net": 1,
+    "spam4.me": 1,
+    "yopmail.com": 1,
+    "yopmail.fr": 1,
+    "tempmail.com": 1,
+    "temp-mail.org": 1,
+    "temp-mail.io": 1,
+    "throwawaymail.com": 1,
+    "trashmail.com": 1,
+    "10minutemail.com": 1,
+    "10minutemail.net": 1,
+    "minutemail.com": 1,
+    "maildrop.cc": 1,
+    "discard.email": 1,
+    "mailnesia.com": 1,
+    "fakeinbox.com": 1,
+    "getnada.com": 1,
+    "emailondeck.com": 1,
+    "moakt.com": 1,
+    "mohmal.com": 1,
+    "tmpmail.org": 1,
+    "tmpmail.net": 1,
+    "mailcatch.com": 1,
+    "mailnull.com": 1,
+    "spamgourmet.com": 1,
+    "mailinator.net": 1,
+    "mailinator.org": 1,
+    "example.com": 1,
+    "example.org": 1,
+    "example.net": 1,
+    "test.com": 1,
+    "test.net": 1,
+    "asdf.com": 1,
+    "qwerty.com": 1,
+    "localhost": 1,
+    "invalid.com": 1,
+    "mail.com.fake": 1,
+  };
+
+  var BLOCKED_EMAIL_LOCALS = {
+    test: 1,
+    testing: 1,
+    fake: 1,
+    asdf: 1,
+    asdfasdf: 1,
+    qwerty: 1,
+    none: 1,
+    na: 1,
+    "n/a": 1,
+    abc: 1,
+    aaa: 1,
+    xxx: 1,
+    noreply: 1,
+    "no-reply": 1,
+  };
+
+  function emailDomain(value) {
+    var at = String(value || "").lastIndexOf("@");
+    if (at < 0) return "";
+    return String(value)
+      .slice(at + 1)
+      .toLowerCase()
+      .replace(/\.+$/, "");
+  }
+
+  function isFakeEmail(value) {
+    var email = String(value || "").trim().toLowerCase();
+    if (!isValidEmail(email)) return true;
+
+    var at = email.lastIndexOf("@");
+    var local = email.slice(0, at);
+    var domain = emailDomain(email);
+    if (!local || !domain) return true;
+
+    if (BLOCKED_EMAIL_DOMAINS[domain]) return true;
+
+    var baseDomain = domain.split(".").slice(-2).join(".");
+    if (baseDomain !== domain && BLOCKED_EMAIL_DOMAINS[baseDomain]) return true;
+
+    if (BLOCKED_EMAIL_LOCALS[local]) return true;
+
+    /* same local@local.tld patterns: fake@fake.com, test@test.org */
+    var domainName = domain.split(".")[0];
+    if (local === domainName && local.length <= 8) return true;
+
+    /* all digits or single-letter local */
+    if (/^\d+$/.test(local) || local.length === 1) return true;
+
+    /* nonsense keyboard locals */
+    if (/^(.)\1{3,}$/.test(local)) return true;
+    if (/^(abc|abcd|abcdef|qwer|qwerty|asdf|zxcv){1,3}$/i.test(local)) return true;
+
+    /* TLD must look real (2–24 letters) */
+    var tld = domain.split(".").pop();
+    if (!tld || !/^[a-z]{2,24}$/.test(tld)) return true;
+
+    return false;
+  }
+
   function escapeHtml(value) {
     return String(value)
       .replace(/&/g, "&amp;")
@@ -715,6 +879,11 @@
     if (!isValidEmail(data.email)) {
       markInvalid("email");
       showError("That email does not look usable. Check the spelling and try again.");
+      return;
+    }
+    if (isFakeEmail(data.email)) {
+      markInvalid("email");
+      showError("Please use a real business or personal email. Temporary or fake addresses are not accepted.");
       return;
     }
     if (!isValidPhone(data.phone)) {

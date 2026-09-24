@@ -26,16 +26,11 @@
   <link rel="icon"
     href="/assets/images/townloc-favicon.png?v=4" />
   <link rel="apple-touch-icon" href="/assets/images/townloc-favicon.png?v=4" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="https://fonts.gstatic.com/s/outfit/v15/QGYvz_MVcBeNP4NJtEtq.woff2" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="assets/tailwind.js"></script>
-  <script>
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/rajdhani-600-latin.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/rajdhani-400-latin.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/josefin-700-latin.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/josefin-400-latin.woff2" crossorigin />
+<script>
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
   </script>
   <script>document.documentElement.classList.add("js");</script>
@@ -47,7 +42,9 @@
       document.documentElement.classList.add("is-ready");
     }, 80);
   </script>
-  <link rel="stylesheet" href="assets/site.css?v=65" />
+  <link rel="stylesheet" href="assets/site.css?v=136" />
+  <link rel="stylesheet" href="assets/tailwind.min.css?v=1" />
+  <link rel="stylesheet" href="assets/amz-text.css?v=64" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -80,7 +77,7 @@
       <a href="index.html" class="site-logo-link flex items-center" aria-label="Townloc home">
         <img class="site-logo site-logo-header" src="assets/images/townloc-logo.png?v=6" alt="Townloc" width="151" height="45" decoding="sync" fetchpriority="high" />
       </a>
-      <ul class="hidden items-center gap-8 text-sm md:flex">
+      <ul class="nav-pill hidden items-center gap-8 text-sm lg:flex">
         <li class="nav-drop relative">
           <button type="button" class="nav-drop-btn nav-link inline-flex items-center gap-1 opacity-85"
             aria-expanded="false" aria-haspopup="true">
@@ -90,8 +87,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
             </svg>
           </button>
-          <div class="nav-drop-menu absolute left-1/2 top-full z-50 w-[min(22rem,calc(100vw-2rem))] pt-3">
-            <div class="nav-drop-panel rounded-[1.35rem] p-1.5">
+          <div class="nav-drop-menu absolute left-0 top-full z-50 pt-3">
+            <div class="nav-drop-panel">
               <a class="nav-drop-item" href="services/google-business-profile-setup.html"><span
                   class="nav-drop-num">01</span><span class="nav-drop-name">Google Business Profile</span><span
                   class="nav-drop-arrow">→</span></a>
@@ -118,10 +115,10 @@
       </ul>
       <div class="flex items-center gap-3">
         <a href="index.html#contact"
-          class="header-cta hidden rounded-full bg-white text-ink px-4 py-2 text-sm font-medium md:inline-flex">Get
+          class="header-cta hidden rounded-full bg-white text-ink px-4 py-2 text-sm font-semibold lg:inline-flex">Get
           Started</a>
         <button id="menu-btn"
-          class="grid h-10 w-10 place-items-center rounded-full border border-white/20 transition-all duration-300 ease-in-out md:hidden"
+          class="grid h-10 w-10 place-items-center rounded-full border border-white/20 transition-all duration-300 ease-in-out lg:hidden"
           aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
           <svg id="icon-open" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
             <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16" />
@@ -133,7 +130,7 @@
         </button>
       </div>
     </nav>
-    <div id="mobile-menu" class="mobile-menu md:hidden" aria-hidden="true">
+    <div id="mobile-menu" class="mobile-menu lg:hidden" aria-hidden="true">
       <div class="mobile-menu-inner">
         <div class="mobile-menu-nav">
           <div class="mobile-menu-item">
@@ -147,7 +144,7 @@
             </button>
             <div id="mobile-services" class="mobile-services">
               <div class="mobile-services-clip">
-                <div class="nav-drop-panel rounded-[1.35rem] p-1.5">
+                <div class="nav-drop-panel">
                   <a class="nav-drop-item mobile-link" href="services/google-business-profile-setup.html"><span
                       class="nav-drop-num">01</span><span class="nav-drop-name">Google Business Profile</span></a>
                   <a class="nav-drop-item mobile-link" href="services/google-maps-review-management.html"><span
@@ -408,6 +405,18 @@
           </a>
           <p class="footer-tagline">Local Google marketing for businesses that already do good work — profile, reviews,
             ads, and websites you own.</p>
+          <form id="footer-subscribe-form" class="footer-subscribe" novalidate>
+<div class="footer-subscribe-row">
+              <label class="visually-hidden" for="footer-subscribe-email">Email</label>
+              <input id="footer-subscribe-email" class="footer-subscribe-input" type="email" name="email" required
+                placeholder="Email address" autocomplete="email" inputmode="email" />
+              <input type="text" name="website2" class="footer-subscribe-hp" tabindex="-1" autocomplete="off"
+                aria-hidden="true" />
+              <button type="submit" class="footer-subscribe-btn">SUBSCRIBE</button>
+            </div>
+            <p id="footer-subscribe-msg" class="footer-subscribe-msg" role="status" hidden></p>
+          </form>
+
         </div>
         <div class="footer-col">
           <p class="footer-col-title">Services</p>
@@ -453,7 +462,7 @@
         <a href="index.html#contact" class="footer-cta">Get a Free Assessment</a>
       </div>
   </footer>
-  <script src="assets/site.js?v=17"></script>
+  <script src="assets/site.js?v=28"></script>
   <script src="assets/cms.js"></script>
 </body>
 
