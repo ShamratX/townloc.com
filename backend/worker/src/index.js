@@ -230,6 +230,25 @@ function withUpdatedPageName(doc, path, name) {
 
   return { pageNames, customPages };
 }
+/** Old/mistyped URLs that must 301 to a current page. */
+const LEGACY_PAGE_ALIASES = {
+  "services/gmb.html": "services/google-business-profile-setup.html",
+  "negative-reviews-emoval.html": "services/remove-negative-reviews.html",
+};
+
+/**
+ * Built-in service pages were briefly served at the site root (/local-seo).
+ * Maps those, and the aliases above, to the built-in services/ path.
+ */
+function legacyServicePath(pagePath) {
+  if (LEGACY_PAGE_ALIASES[pagePath]) return LEGACY_PAGE_ALIASES[pagePath];
+  const m = pagePath.match(/^([a-z0-9]+(?:-[a-z0-9]+)*)\.html$/i);
+  if (!m) return null;
+  const builtIn = `services/${m[1].toLowerCase()}.html`;
+  return PAGE_ALLOWLIST_SET.has(builtIn) && !FIXED_PAGE_PATHS.has(builtIn)
+    ? builtIn
+    : null;
+}
 
 function publicHrefForPath(path) {
   const p = String(path || "").replace(/^\/+/, "");
@@ -3776,6 +3795,18 @@ async function serveAssetWithCms(request, env) {
       }
     } catch (err) {
       console.error("D1 page read failed", err);
+    }
+
+    // No CMS page here: send legacy/mistyped URLs to the current page.
+    const legacyTarget = html == null ? legacyServicePath(pagePath) : null;
+    if (legacyTarget) {
+      try {
+        const doc = await readCmsDocument(env);
+        const dest = publicHrefForPath(resolveRedirectPath(doc, legacyTarget));
+        return Response.redirect(new URL(dest + url.search, url).toString(), 301);
+      } catch (err) {
+        console.error("legacy page redirect failed", err);
+      }
     }
   }
 

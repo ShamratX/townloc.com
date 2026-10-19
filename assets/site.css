@@ -207,9 +207,9 @@ html.js .reveal.reveal-pending.in {
 
 #site-header .site-logo-header {
   display: block;
-  height: 58px;
+  height: 50px;
   width: auto;
-  max-height: 58px;
+  max-height: 50px;
   max-width: none;
   object-fit: contain;
   object-position: left center;
@@ -272,8 +272,8 @@ html.js .reveal.reveal-pending.in {
 }
 
 .site-logo-footer {
-  height: 49px;
-  max-height: 49px;
+  height: 50px;
+  max-height: 50px;
   width: auto;
   max-width: 165px;
   object-fit: contain;
